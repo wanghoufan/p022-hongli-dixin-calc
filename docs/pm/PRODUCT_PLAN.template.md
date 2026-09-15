@@ -1,0 +1,34 @@
+# PRODUCT_PLAN（Phase1 专用；Readiness 定义唯一正典，卡内引用不重写）
+
+- Plan Version：
+- PROJECT_PHASE：（PLAN / WAITING_HUMAN_APPROVAL / DEVELOP / PLAN_REOPEN_REQUIRED，仅Change C受控重开期间）
+- Product Goal：
+- Target Users：
+- Problem：
+- Core Value：
+- User Flow：
+- Functional Scope：
+- Out of Scope：
+- Technical Approach：
+- Data / API：
+- Key Assumptions：
+- Competitor / Research Summary：
+- Risks：
+- DoD：
+- P0 / P1 / P2：
+  - P0（非做不可）：
+  - P1（blocking / 非 blocking 注明）：
+  - P2：
+- Human Decisions Needed：
+- Readiness Score（Plan Readiness Score / 计划成熟度，满分 100）：
+  - 产品目标与用户需求（20）：
+  - 核心方案完整性（20）：
+  - 外部事实与竞品验证（20）：
+  - 技术可行性（15）：
+  - 风险与异常场景（10）：
+  - 开发范围与 DoD（10）：
+  - 未决问题（5）：
+  - 合计：
+  - Gate（进 Human Review 条件）：Readiness >= 90 AND P0 = 0 AND blocking P1 = 0 AND 关键事实已验证 AND 核心假设已合理验证
+- Research Review Round（第几轮/Reviewer 结论摘要）：
+- PLAN_GATE：（IN_PROGRESS / READY_FOR_HUMAN_REVIEW / APPROVED）

@@ -1,0 +1,65 @@
+{
+  "version": "V1.2",
+  "as_of": "2026-09-15",
+  "quote_policy": {
+    "primary": "腾讯公开行情",
+    "secondary": "东方财富公开行情",
+    "fallback": "cache/quotes.json",
+    "note": "仅用于测算，正式下单以券商行情为准"
+  },
+  "indices": {
+    "H30269": {
+      "name": "中证红利低波动指数",
+      "rebalance": "annual",
+      "rule": "12月第二个星期五的下一交易日",
+      "methodology": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/H30269_Index_Methodology_cn.pdf",
+      "factsheet": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/H30269factsheet.pdf",
+      "constituents": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/H30269cons.xls",
+      "weights": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/closeweight/H30269closeweight.xls"
+    },
+    "930740": {
+      "name": "沪深300红利低波动指数",
+      "rebalance": "semiannual",
+      "rule": "6月、12月第二个星期五的下一交易日",
+      "methodology": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/930740_Index_Methodology_cn.pdf",
+      "factsheet": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/930740factsheet.pdf",
+      "constituents": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/930740cons.xls",
+      "weights": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/closeweight/930740closeweight.xls"
+    },
+    "930955": {
+      "name": "中证红利低波动100指数",
+      "rebalance": "quarterly",
+      "rule": "3月、6月、9月、12月第二个星期五的下一交易日",
+      "methodology": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/20231208180204-930955_Index_Methodology_cn.pdf",
+      "factsheet": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/930955factsheet.pdf",
+      "constituents": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/930955cons.xls",
+      "weights": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/closeweight/930955closeweight.xls"
+    },
+    "931468": {
+      "name": "中证红利质量指数",
+      "rebalance": "semiannual",
+      "rule": "6月、12月第二个星期五的下一交易日",
+      "methodology": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/20231208180546-931468_Index_Methodology_cn.pdf",
+      "factsheet": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/931468factsheet.pdf",
+      "constituents": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/931468cons.xls",
+      "weights": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/closeweight/931468closeweight.xls"
+    },
+    "931446": {
+      "name": "中证东方红红利低波动指数",
+      "rebalance": "semiannual",
+      "rule": "6月、12月第二个星期五的下一交易日",
+      "methodology": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/20231208180546-931446_Index_Methodology_cn.pdf",
+      "factsheet": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/931446factsheet.pdf",
+      "constituents": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/931446cons.xls",
+      "weights": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/closeweight/931446closeweight.xls"
+    },
+    "SPCLLHCP": {
+      "name": "S&P China A-Share LargeCap Low Volatility High Dividend 50 Index",
+      "rebalance": "semiannual",
+      "rule": "1月、7月最后一个营业日收盘后生效；参考日为前一个12月和6月最后一个营业日",
+      "official_page": "https://www.spglobal.com/spdji/en/indices/dividends-factors/sp-china-a-share-largecap-low-volatility-high-dividend-50-index/",
+      "methodology": "https://www.spglobal.com/spdji/zh/documents/methodologies/methodology-sp-low-volatility-high-dividend-indices.pdf",
+      "current_weight_note": "若官方页面未提供可下载每日权重，ETF 515450持仓仅可做代理并必须明确标注"
+    }
+  }
+}

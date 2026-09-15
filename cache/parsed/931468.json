@@ -1,0 +1,359 @@
+{
+  "code": "931468",
+  "date": "20260831",
+  "source": "official-xls-parsed",
+  "saved_at": "2026-09-15T12:28:19+08:00",
+  "holdings": [
+    {
+      "code": "000423",
+      "name": "东阿阿胶",
+      "market": "SZ",
+      "weight": 3.389,
+      "star": false
+    },
+    {
+      "code": "000513",
+      "name": "丽珠集团",
+      "market": "SZ",
+      "weight": 0.131,
+      "star": false
+    },
+    {
+      "code": "000651",
+      "name": "格力电器",
+      "market": "SZ",
+      "weight": 0.684,
+      "star": false
+    },
+    {
+      "code": "000933",
+      "name": "神火股份",
+      "market": "SZ",
+      "weight": 3.132,
+      "star": false
+    },
+    {
+      "code": "000975",
+      "name": "山金国际",
+      "market": "SZ",
+      "weight": 1.931,
+      "star": false
+    },
+    {
+      "code": "001316",
+      "name": "润贝航科",
+      "market": "SZ",
+      "weight": 1.625,
+      "star": false
+    },
+    {
+      "code": "001337",
+      "name": "四川黄金",
+      "market": "SZ",
+      "weight": 3.919,
+      "star": false
+    },
+    {
+      "code": "002039",
+      "name": "黔源电力",
+      "market": "SZ",
+      "weight": 2.345,
+      "star": false
+    },
+    {
+      "code": "002128",
+      "name": "电投能源",
+      "market": "SZ",
+      "weight": 2.997,
+      "star": false
+    },
+    {
+      "code": "002415",
+      "name": "海康威视",
+      "market": "SZ",
+      "weight": 4.042,
+      "star": false
+    },
+    {
+      "code": "002532",
+      "name": "天山铝业",
+      "market": "SZ",
+      "weight": 1.269,
+      "star": false
+    },
+    {
+      "code": "002558",
+      "name": "巨人网络",
+      "market": "SZ",
+      "weight": 3.695,
+      "star": false
+    },
+    {
+      "code": "002648",
+      "name": "卫星化学",
+      "market": "SZ",
+      "weight": 2.95,
+      "star": false
+    },
+    {
+      "code": "002832",
+      "name": "比音勒芬",
+      "market": "SZ",
+      "weight": 2.238,
+      "star": false
+    },
+    {
+      "code": "002847",
+      "name": "盐津铺子",
+      "market": "SZ",
+      "weight": 2.462,
+      "star": false
+    },
+    {
+      "code": "002901",
+      "name": "大博医疗",
+      "market": "SZ",
+      "weight": 1.397,
+      "star": false
+    },
+    {
+      "code": "002916",
+      "name": "深南电路",
+      "market": "SZ",
+      "weight": 0.52,
+      "star": false
+    },
+    {
+      "code": "300033",
+      "name": "同花顺",
+      "market": "SZ",
+      "weight": 4.077,
+      "star": false
+    },
+    {
+      "code": "300373",
+      "name": "扬杰科技",
+      "market": "SZ",
+      "weight": 1.395,
+      "star": false
+    },
+    {
+      "code": "300558",
+      "name": "贝达药业",
+      "market": "SZ",
+      "weight": 1.232,
+      "star": false
+    },
+    {
+      "code": "300573",
+      "name": "兴齐眼药",
+      "market": "SZ",
+      "weight": 1.037,
+      "star": false
+    },
+    {
+      "code": "300693",
+      "name": "盛弘股份",
+      "market": "SZ",
+      "weight": 0.803,
+      "star": false
+    },
+    {
+      "code": "300760",
+      "name": "迈瑞医疗",
+      "market": "SZ",
+      "weight": 0.431,
+      "star": false
+    },
+    {
+      "code": "300770",
+      "name": "新媒股份",
+      "market": "SZ",
+      "weight": 0.239,
+      "star": false
+    },
+    {
+      "code": "300841",
+      "name": "康华生物",
+      "market": "SZ",
+      "weight": 3.144,
+      "star": false
+    },
+    {
+      "code": "300957",
+      "name": "贝泰妮",
+      "market": "SZ",
+      "weight": 2.329,
+      "star": false
+    },
+    {
+      "code": "301345",
+      "name": "涛涛车业",
+      "market": "SZ",
+      "weight": 2.256,
+      "star": false
+    },
+    {
+      "code": "600012",
+      "name": "皖通高速",
+      "market": "SH",
+      "weight": 1.766,
+      "star": false
+    },
+    {
+      "code": "600211",
+      "name": "西藏药业",
+      "market": "SH",
+      "weight": 3.454,
+      "star": false
+    },
+    {
+      "code": "600309",
+      "name": "万华化学",
+      "market": "SH",
+      "weight": 0.488,
+      "star": false
+    },
+    {
+      "code": "600323",
+      "name": "瀚蓝环境",
+      "market": "SH",
+      "weight": 2.029,
+      "star": false
+    },
+    {
+      "code": "600535",
+      "name": "天士力",
+      "market": "SH",
+      "weight": 0.078,
+      "star": false
+    },
+    {
+      "code": "600887",
+      "name": "伊利股份",
+      "market": "SH",
+      "weight": 1.632,
+      "star": false
+    },
+    {
+      "code": "600900",
+      "name": "长江电力",
+      "market": "SH",
+      "weight": 2.355,
+      "star": false
+    },
+    {
+      "code": "600938",
+      "name": "中国海油",
+      "market": "SH",
+      "weight": 2.754,
+      "star": false
+    },
+    {
+      "code": "600989",
+      "name": "宝丰能源",
+      "market": "SH",
+      "weight": 3.117,
+      "star": false
+    },
+    {
+      "code": "601869",
+      "name": "长飞光纤",
+      "market": "SH",
+      "weight": 2.051,
+      "star": false
+    },
+    {
+      "code": "603195",
+      "name": "公牛集团",
+      "market": "SH",
+      "weight": 0.8,
+      "star": false
+    },
+    {
+      "code": "603233",
+      "name": "大参林",
+      "market": "SH",
+      "weight": 1.217,
+      "star": false
+    },
+    {
+      "code": "603345",
+      "name": "安井食品",
+      "market": "SH",
+      "weight": 0.506,
+      "star": false
+    },
+    {
+      "code": "603444",
+      "name": "吉比特",
+      "market": "SH",
+      "weight": 4.397,
+      "star": false
+    },
+    {
+      "code": "603699",
+      "name": "纽威股份",
+      "market": "SH",
+      "weight": 1.523,
+      "star": false
+    },
+    {
+      "code": "603893",
+      "name": "瑞芯微",
+      "market": "SH",
+      "weight": 1.326,
+      "star": false
+    },
+    {
+      "code": "603939",
+      "name": "益丰药房",
+      "market": "SH",
+      "weight": 0.332,
+      "star": false
+    },
+    {
+      "code": "605117",
+      "name": "德业股份",
+      "market": "SH",
+      "weight": 3.077,
+      "star": false
+    },
+    {
+      "code": "688025",
+      "name": "杰普特",
+      "market": "SH",
+      "weight": 0.848,
+      "star": true
+    },
+    {
+      "code": "688111",
+      "name": "金山办公",
+      "market": "SH",
+      "weight": 3.153,
+      "star": true
+    },
+    {
+      "code": "688127",
+      "name": "蓝特光学",
+      "market": "SH",
+      "weight": 1.827,
+      "star": true
+    },
+    {
+      "code": "688188",
+      "name": "柏楚电子",
+      "market": "SH",
+      "weight": 1.993,
+      "star": true
+    },
+    {
+      "code": "688578",
+      "name": "艾力斯",
+      "market": "SH",
+      "weight": 3.609,
+      "star": true
+    }
+  ],
+  "weight_sum": 100.001
+}

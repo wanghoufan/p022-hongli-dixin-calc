@@ -1,0 +1,667 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>红利指数估值与打新底仓计算器｜V1.2 正式长期版</title>
+<script src="xlsx.full.min.js" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';document.head.appendChild(s);"></script>
+<style>
+:root{--bg:#f6f8fb;--card:#fff;--ink:#172033;--muted:#667085;--line:#e6eaf0;--blue:#1f62d1;--green:#087a55;--amber:#a66500;--red:#b42318;--soft:#eef4ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.wrap{max-width:1500px;margin:auto;padding:24px}h1{font-size:28px;margin:0 0 6px}h2{font-size:18px;margin:0 0 14px}h3{font-size:15px;margin:0 0 8px}.sub,.small{color:var(--muted)}.small{font-size:12px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-top:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 2px 10px rgba(16,24,40,.035)}.span12{grid-column:span 12}.span8{grid-column:span 8}.span4{grid-column:span 4}.span6{grid-column:span 6}@media(max-width:900px){.span8,.span4,.span6{grid-column:span 12}.wrap{padding:12px}}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:end}label{display:flex;flex-direction:column;gap:5px;color:var(--muted);font-size:12px}select,input,button{font:inherit}select,input[type=number],input[type=text]{min-height:38px;border:1px solid #cfd6df;border-radius:9px;padding:7px 10px;background:white;color:var(--ink)}button,.btn{border:1px solid #c9d4e5;background:#fff;border-radius:9px;padding:8px 12px;cursor:pointer;color:#244}button.primary{background:var(--blue);border-color:var(--blue);color:#fff}button:disabled{opacity:.55;cursor:wait}.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.badge{padding:4px 8px;border-radius:999px;background:#eef2f6;color:#475467;font-size:12px}.badge.ok{background:#e8f7f0;color:#087a55}.badge.warn{background:#fff4e5;color:#a15c00}.note{padding:11px 13px;background:#f5f8ff;border-left:4px solid #6b91d9;border-radius:8px;margin-top:12px}.note.warn{background:#fff8eb;border-color:#f3a847}.note.red{background:#fff1f0;border-color:#f97066}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi{border:1px solid var(--line);border-radius:12px;padding:12px}.kpi b{display:block;font-size:18px;margin-top:3px}@media(max-width:750px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;white-space:nowrap}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right}th{position:sticky;top:0;background:#f9fafb;z-index:1;color:#475467;font-size:12px}td:first-child,th:first-child,td:nth-child(2),th:nth-child(2){text-align:left}tr:hover td{background:#fbfdff}.selected td{background:#eef5ff!important}.source-links{display:flex;gap:8px;flex-wrap:wrap}.source-links a{display:inline-flex;padding:7px 9px;border:1px solid #d7e1ef;border-radius:8px;background:#fbfdff}.pill{padding:2px 6px;border-radius:999px;font-size:11px;background:#eef2f6}.sh{color:#b42318;background:#fff1f0}.sz{color:#175cd3;background:#eff8ff}.star{color:#6941c6;background:#f4f3ff}.modebar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.mode{border:1px solid #d0d5dd;border-radius:10px;padding:8px 10px;cursor:pointer}.mode.active{border-color:#2e6bd3;background:#eef4ff}.mode input{margin-right:6px}.price{width:92px}.status{padding:10px;border-radius:8px;background:#f8fafc;margin-top:10px}.good{color:var(--green)}.bad{color:var(--red)}.amber{color:var(--amber)}.muted{color:var(--muted)}.foot{margin:18px 0 40px;color:#667085;font-size:12px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:800px){.two{grid-template-columns:1fr}}
+.runtime{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-top:12px}.runtime>div{border:1px solid var(--line);border-radius:12px;padding:10px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#98a2b3;margin-right:6px}.dot.ok{background:#12b76a}.dot.warn{background:#f79009}.dot.bad{background:#f04438}@media(max-width:800px){.runtime{grid-template-columns:1fr}}
+.layer{margin:2px 0;white-space:normal;text-align:left}.layer .badge{padding:1px 5px;font-size:10px;background:#f1f4f9;color:#475467}.na{color:#98a2b3;font-style:italic}.ro-price{font-weight:600}.widebase-row td{background:#fbfcff}.advanced{border:1px dashed #f3a847;border-radius:10px;padding:10px;margin-top:10px}
+/* ===== D7 估值紧凑区 / 行内确认 / 复制 toast ===== */
+.vsec{margin-top:14px}.vsec h3{margin:0 0 4px;font-size:14px}
+table.vtable{white-space:normal}table.vtable th,table.vtable td{padding:6px 8px;font-size:12.5px;vertical-align:middle}
+table.vtable thead th{position:sticky;top:0;background:#f7f9fc;z-index:2}
+table.vtable td:first-child,table.vtable th:first-child{text-align:left;white-space:nowrap}
+table.vtable td:nth-child(2),table.vtable th:nth-child(2){text-align:left}
+.vna{color:#98a2b3;font-style:italic}
+.vlow{color:#087a55}.vmid{color:#a66500}.vhigh{color:#b42318}
+.vtag{font-size:10px;border:1px solid currentColor;border-radius:6px;padding:0 4px;margin-left:3px;opacity:.85;white-space:nowrap}
+.vfoot{margin-top:6px;line-height:1.6}.vfoot .layer{margin:1px 0}
+.dp-confirm{display:inline-flex;gap:4px;align-items:center;background:#fff8eb;border:1px solid #f3a847;border-radius:8px;padding:2px 5px}
+.dp-confirm button{padding:3px 7px;font-size:12px}
+.cp-toast{position:relative;display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#087a55;color:#fff;font-size:11px;animation:cPfade 2s forwards}
+@keyframes cPfade{0%{opacity:0}12%{opacity:1}80%{opacity:1}100%{opacity:0}}
+.dp-rowactive td{background:#fffdf5!important}
+</style></head><body><div class="wrap">
+<h1>红利指数估值 × 打新底仓计算器 <span class="badge ok">V1.2 正式长期版</span></h1>
+<div class="sub">长期正式版：看估值 → 官方核成分 → 配底仓 → 主/备行情 → 四舍五入下单。官方权重和最近行情会持久化到本项目 cache 目录，浏览器缓存仅作为第二层。</div>
+
+<div class="grid">
+<section class="card span12"><h2>运行与缓存状态</h2>
+<div id="directFileWarning" class="note warn" style="display:none"><b>当前是直接双击 HTML 的降级模式。</b>正式长期使用请双击压缩包内的 <code>启动工具.command</code>（Mac）或 <code>启动工具.bat</code>（Windows），让本地服务负责官方权重缓存、主备行情和时间戳。直接 file:// 打开仍能使用内置/浏览器缓存，但跨域可能导致自动更新失败。</div>
+<div class="runtime"><div><b><span id="serverDot" class="dot"></span><span id="serverState">检测本地服务…</span></b><div id="cacheDetail" class="small" style="margin-top:5px">—</div></div><div><b>官方权重缓存</b><div id="weightCacheState" class="small" style="margin-top:5px">检测中…</div></div><div><b>行情缓存</b><div id="quoteCacheState" class="small" style="margin-top:5px">检测中…</div></div></div>
+<div class="toolbar" style="margin-top:10px"><button id="initCacheBtn" class="primary">初始化/更新全部官方缓存</button><button id="cacheStatusBtn">重新检查缓存</button><span class="small">首次联网初始化一次；以后即使官方站临时不可达，也会继续使用磁盘旧缓存，并标明数据日期。</span></div>
+</section>
+<section class="card span12"><h2>一、指数估值与回撤（紧凑总览 · 上宽基 / 下红利）</h2>
+<div class="note small"><b>统一字段顺序（两张表一致）：</b>指数/代码 → 当前收盘 → 距历史最高回撤 → PE十年分位 → PB十年分位 → 股息率十年分位 → 风险溢价（PE口径）→ 风险溢价（股息率口径）→ 联合解释 → 来源/官方核验。分位分档：<span class="vlow">偏低 &lt;30%（绿）</span>／<span class="vmid">中性 30~80%（黄）</span>／<span class="vhigh">偏高 &gt;80%（红）</span>，<b>同时用文字标识，不依赖颜色</b>。口径/日期/抓取时间见每张表下方脚注，单元格可悬停查看来源。课程、官方、<b>公开估算</b>三层<b>分区展示、绝不合并</b>；无证据字段只显示「暂无数据」。V1.2 旧区块（选择指数/成分权重/行情）保持不变。</div>
+
+<div class="vsec">
+<h3>A. 宽基市场环境（沪深300 / 中证500 / 中证1000）</h3>
+<div class="small muted">编制说明：中证指数公司规模宽基。沪深300＝沪深两市市值大、流动性好的 300 只；中证500＝剔除沪深300后按总市值 301–800 名；中证1000＝再剔除沪深300、中证500后 801–1800 名。均为价格指数、收盘口径。</div>
+<div class="tablewrap" style="margin-top:8px"><table class="vtable" id="valuationTable"><thead><tr>
+<th>指数 / 代码</th><th data-col="currentClose">当前收盘</th><th data-col="drawdown">距历史最高回撤</th><th data-col="pePct">PE十年分位</th><th data-col="pbPct">PB十年分位</th><th data-col="dyPct">股息率十年分位</th><th data-col="rpPe">风险溢价（PE口径）</th><th data-col="rpDy">风险溢价（股息率口径）</th><th data-col="explain">联合解释</th><th data-col="links">来源 / 官方核验</th>
+</tr></thead><tbody id="valuationRows"></tbody></table></div>
+<div class="vfoot small muted" id="valuationFootnoteWide"></div>
+</div>
+
+<div class="vsec">
+<h3>B. 红利指数（六只，顺序不变）</h3>
+<div class="small muted">编制说明：中证/标普红利策略指数，按股息率加权或“股息率＋低波”筛选。红利低波＝50 只、300红利低波＝50 只、红利低波100＝100 只、红利质量＝50 只、东证红利低波＝100 只、标普中国A股大盘红利低波50＝50 只。均为价格指数、收盘口径。</div>
+<div class="tablewrap" style="margin-top:8px"><table class="vtable" id="valuationDivTable"><thead><tr>
+<th>指数 / 代码</th><th data-col="currentClose">当前收盘</th><th data-col="drawdown">距历史最高回撤</th><th data-col="pePct">PE十年分位</th><th data-col="pbPct">PB十年分位</th><th data-col="dyPct">股息率十年分位</th><th data-col="rpPe">风险溢价（PE口径）</th><th data-col="rpDy">风险溢价（股息率口径）</th><th data-col="explain">联合解释</th><th data-col="links">来源 / 官方核验</th>
+</tr></thead><tbody id="valuationDivRows"></tbody></table></div>
+<div class="vfoot small muted" id="valuationFootnoteDiv"></div>
+</div>
+
+<div class="small" style="margin-top:9px">回撤口径固定为 <b>当前收盘 / 同指数最高收盘 - 1</b>，且当前收盘与最高收盘必须来自<b>同一指数收盘序列</b>。双源核验要求：同指数、同字段、同交易日、同价格（非全收益/净收益、非 ETF/个股、非盘中 high）；按交易日 inner join，并集缺失率 ≤ 0.5%，相对误差 ≤ 0.10%，候选最高 20 个收盘日不得缺日。<b>核验不通过时只显示「暂无数据」并给原因，绝不静默取较高值。</b>对较晚发布的指数，公开网站可能只展示“自有数据以来/近5年”分位，不能与课程的 10 年分位机械等同。</div>
+</section>
+
+<section class="card span8"><h2>二、当前指数：<span id="idxTitle"></span></h2>
+<div class="toolbar"><label>选择指数<select id="indexSelect"></select></label><div id="idxBadges" class="badges"></div></div>
+<div class="two" style="margin-top:12px"><div><h3>官方核验入口</h3><div id="officialLinks" class="source-links"></div></div><div><h3>交叉验证入口</h3><div id="crossLinks" class="source-links"></div></div></div>
+<div id="sourceNote" class="note"></div>
+</section>
+<section class="card span4"><h2>数据状态</h2><div class="kpis"><div class="kpi"><span class="small">样本数</span><b id="sampleCount">—</b></div><div class="kpi"><span class="small">权重合计</span><b id="weightSum">—</b></div><div class="kpi"><span class="small">沪市权重</span><b id="shWeight">—</b></div><div class="kpi"><span class="small">深市权重</span><b id="szWeight">—</b></div></div><div id="dataStatus" class="status small"></div></section>
+
+<section class="card span12"><h2>三、成分股与权重：官方优先 + 可自行核验</h2>
+<div class="toolbar"><button class="primary" id="loadOfficialBtn">读取/刷新官方权重</button><a class="btn" id="downloadWeight" target="_blank">下载官方权重 XLS</a><a class="btn" id="downloadCons" target="_blank">下载官方成分 XLS</a><label>或导入 XLS/XLSX/CSV<input id="fileInput" type="file" accept=".xls,.xlsx,.csv"></label></div>
+<div id="importHint" class="note"></div>
+</section>
+
+<section class="card span12"><h2>四、输入资金 → 自动生成每只股票下单数量</h2>
+<div class="modebar">
+<label class="mode"><input type="radio" name="mode" value="course">课程原法：沪市锚定10万</label>
+<label class="mode active"><input type="radio" name="mode" value="strict" checked>总资金10万/20万：严格按指数权重</label>
+<label class="mode"><input type="radio" name="mode" value="dual">打新优先：沪深分别设定</label>
+</div>
+<div class="toolbar">
+<label id="shField" style="display:none">沪市目标市值（元）<input id="shBudget" type="number" min="0" step="10000" value="100000"></label>
+<label id="szField" style="display:none">深市目标市值（元）<input id="szBudget" type="number" min="0" step="10000" value="100000"></label>
+<label id="totalField">总资金（元）<input id="totalBudget" type="number" min="0" step="10000" value="100000"></label>
+<label>搜索<input id="search" type="text" placeholder="代码/名称"></label><label>市场<select id="marketFilter"><option value="ALL">全部</option><option value="SH">沪市</option><option value="SZ">深市</option></select></label>
+<label style="flex-direction:row;align-items:center;margin-bottom:8px"><input id="excludeStar" type="checkbox">无科创板权限时排除688</label>
+<button id="refreshBtn" class="primary">刷新当前行情</button><button id="csvBtn">导出CSV</button><button id="copyBtn">复制下单清单</button>
+</div>
+<div id="modeWarning" class="note"></div>
+<div id="quoteStatus" class="status small"></div>
+<div class="kpis" style="margin:12px 0"><div class="kpi"><span class="small">理论目标总额</span><b id="targetTotal">—</b></div><div class="kpi"><span class="small">四舍五入后实际</span><b id="actualTotal">—</b></div><div class="kpi"><span class="small">实际沪市</span><b id="actualSH">—</b></div><div class="kpi"><span class="small">实际深市</span><b id="actualSZ">—</b></div></div>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>市场</th><th>代码</th><th>名称</th><th>指数权重</th><th>本模式权重</th><th>当前价格（只读）</th><th>行情源 / 时间 / 状态</th><th>目标金额</th><th>理论股数</th><th>四舍五入后</th><th>手数</th><th>实际投入</th><th>偏差</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="small" style="margin-top:8px">普通A股按100股整数手四舍五入；科创板按当前交易单位单独处理。行情为<b>只读三路</b>：腾讯公开行情（主，LIVE）→ 东方财富公开行情（备用，DEGRADED）→ 本地最近成功缓存（CACHE / STALE_BLOCKED，超过 72 小时或 3 个交易日即标陈旧）；每只股票显示来源、时间、数据日期与状态。两路均非交易所授权下单行情，只用于测算；正式下单仍以券商盘口为准。<b>普通价格只读；需要手工核价时使用下方默认隐藏的「高级异常处理」区</b>。</div>
+<div class="advanced">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <div class="small"><b>高级异常处理（默认隐藏）：</b>仅当三路行情都不可用且必须人工核价时使用。手动覆盖只影响本页测算展示、写入本机 localStorage（键 <code>divManualOverride</code>）并标记 <b>MANUAL_OVERRIDE</b>，<b>不进账本定价</b>（新建冻结批次会拒绝带有手动覆盖的股票并提示）。</div>
+    <button id="manualToggleBtn" type="button">显示高级异常处理</button>
+  </div>
+  <div id="manualOverrideArea" style="display:none;margin-top:10px">
+    <div class="small muted">输入后回车生效；清空输入或点「清除」即恢复自动行情。刷新页面仍会保留（localStorage）。</div>
+    <div class="tablewrap" style="margin-top:8px"><table><thead><tr><th>代码</th><th>名称</th><th>当前行情</th><th>行情状态</th><th>手动覆盖价（元）</th><th>操作</th></tr></thead><tbody id="manualRows"></tbody></table></div>
+    <div class="toolbar" style="margin-top:8px"><button id="manualClearBtn" type="button">清空全部手动覆盖</button><span class="small muted" id="manualCount"></span></div>
+  </div>
+</div>
+</section>
+
+<section class="card span12"><h2>五、交叉验证规则（网站内固定保留）</h2><div class="two"><div class="note"><b>估值：</b>课程/Wind快照负责“10年分位、风险溢价”；中证factsheet负责官方绝对PE/PB/股息；理杏仁等公开来源负责第三方复核。若口径冲突，不覆盖原值，而是并排显示；第三方分位的加权方式/观察期必须看来源，不能直接冒充课程的10年Wind口径。</div><div class="note"><b>成分：</b>中证指数优先官方 closeweight/cons XLS；标普指数优先标普官方 Full Constituents List。标普权重若官方页面未公开可下载日权重，则V1.2沿用跟踪ETF 515450 的2026中报完整指数投资持仓做代理，并明确标注。</div></div></section>
+<section class="card span12"><h2>六、下单执行（手机辅助 · checklist · D3）</h2>
+<div class="note small"><b>人工执行闭环：</b>冻结批次后，逐只对照银河 APP 人工下单，把每只处理为“待下单 / 已确认成交 / 已跳过 / 待复核”。<b>只有“已确认成交”才写入真实交易账本</b>（经 record_transaction 联动，不可逆转）；全部处理为“已确认成交/已跳过”才通过完成门禁。刷新页面会从本地服务恢复进度；演示数据为虚构、可清除。</div>
+<div class="toolbar" style="margin-top:10px">
+  <label>投资周期<select id="dpCycleSelect"></select></label>
+  <button id="dpNewCycleBtn">新建周期</button>
+  <label>下单批次<select id="dpBatchSelect"></select></label>
+  <button id="dpReloadBtn">刷新进度</button>
+  <label>批次类型<select id="dpKindSelect"><option value="INITIAL">首次建仓</option><option value="ADD">追加投资</option><option value="REBALANCE">全面再平衡</option><option value="EXIT">清仓退出</option></select></label>
+  <label>新增资金（元，建仓/追加用）<input id="dpCapital" type="number" min="0" step="10000" value="100000"></label>
+  <button id="dpFreezeBtn" class="primary">用当前测算新建冻结批次</button>
+</div>
+<div id="dpHint" class="small muted">检测本地账本服务…</div>
+<div id="dpProgressCard" style="margin-top:10px">
+  <div class="small" id="dpProgressText">尚未选择批次。</div>
+  <div style="background:#eef2f6;border-radius:999px;height:12px;overflow:hidden;margin-top:6px"><div id="dpProgressBar" style="height:100%;width:0%;background:var(--green);transition:width .2s"></div></div>
+  <div id="dpGateNote" class="note" style="display:none"></div>
+</div>
+<div class="modebar" style="margin-top:10px">
+  <label class="mode active"><input type="radio" name="dpView" value="list" checked>checklist 列表</label>
+  <label class="mode"><input type="radio" name="dpView" value="focus">单只专注模式</label>
+  <button id="dpCompleteBtn" disabled>完成批次</button>
+</div>
+<div id="dpListView" class="tablewrap">
+  <table><thead><tr><th>#</th><th>市场</th><th>代码</th><th>名称</th><th>方向</th><th>建议股数</th><th>参考价</th><th>状态</th><th>四态操作</th><th>复制</th></tr></thead><tbody id="dpRows"></tbody></table>
+</div>
+<div id="dpFocusView" style="display:none;margin-top:10px">
+  <div class="card" style="border:1px solid var(--line);box-shadow:none">
+    <div class="small muted" id="dpFocusPos">—</div>
+    <h3 id="dpFocusTitle">—</h3>
+    <div id="dpFocusBody" class="small">—</div>
+    <div class="toolbar" style="margin-top:10px">
+      <button id="dpPrevBtn">← 上一只</button>
+      <button id="dpNextBtn">下一只 →</button>
+      <button id="dpFocusConfirmBtn" class="primary">确认成交</button>
+      <button id="dpFocusSkipBtn">跳过</button>
+      <button id="dpFocusReviewBtn">待复核</button>
+    </div>
+    <div id="dpFocusCopy" class="toolbar" style="margin-top:8px"></div>
+  </div>
+</div>
+<div id="dpDoneWrap" class="note" style="display:none"></div>
+<div class="advanced" style="margin-top:10px">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <div class="small"><b>高级异常处理（默认隐藏）：</b>仅用于<b>测试/误操作</b>后清掉当前批次。删除会整批移除该批次的全部下单行、已确认成交与对应现金事件，并写审计日志。<b>已确认成交的批次需输入「确认删除」四字</b>；<b>周期已关闭（CLOSED）时拒绝删除</b>；普通 A 股正式批次请谨慎使用。</div>
+    <button id="dpAdvToggleBtn" type="button">显示高级异常处理</button>
+  </div>
+  <div id="dpAdvArea" style="display:none;margin-top:10px">
+    <div class="toolbar">
+      <button id="dpDeleteBatchBtn" type="button">删除当前测试批次</button>
+      <span class="small muted" id="dpDeleteHint">仅删除「下单批次」下拉框当前选中的批次。</span>
+    </div>
+  </div>
+</div>
+</section>
+<section class="card span12"><h2>七、持仓与历史（只读 · 重建自 confirmed 成交）</h2>
+<div class="toolbar">
+  <label>投资周期<select id="hpCycleSelect"></select></label>
+  <button id="hpReloadBtn">刷新持仓与历史</button>
+  <span class="small muted" id="hpHint">检测本地账本服务…</span>
+</div>
+<div class="kpis" style="margin:12px 0">
+  <div class="kpi"><span class="small">周期状态</span><b id="hpCycleStatus">—</b></div>
+  <div class="kpi"><span class="small">策略现金余额</span><b id="hpCashBalance">—</b></div>
+  <div class="kpi"><span class="small">批次数量</span><b id="hpBatchCount">—</b></div>
+  <div class="kpi"><span class="small">成交笔数</span><b id="hpTxCount">—</b></div>
+</div>
+<div class="note" id="hpRebuildNote">持仓来源：<b id="hpRebuildSource">—</b>。只有人工核实「已成交/已卖出成交」的 confirmed 记录才进入账本并重建持仓；非当前成分持仓以 <span class="badge">STALE_CONSTITUENT</span> 标记保留显示，不向其分配新 BUY，清仓时照常全仓卖出。</div>
+<div class="tablewrap"><table><thead><tr><th>市场</th><th>代码</th><th>名称</th><th>数量</th><th>均价（元）</th><th>成本（元）</th><th>成分状态</th><th>来源声明</th></tr></thead><tbody id="hpRows"></tbody></table></div>
+<h3 style="margin-top:14px">策略现金事件流水</h3>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>时间</th><th>类型</th><th>金额（元）</th><th>关联交易</th><th>备注</th></tr></thead><tbody id="hpCashRows"></tbody></table></div>
+</section>
+</div><div class="foot">仅用于复刻课程方法、数据核对与资金测算，不构成投资建议。指数会按规则定期调样：本工具显示每只指数自身的调样频率，不再假设“统一一年一次”。正式下单前，建议点击本页相应位置的官方链接重新核验成分、权重与交易规则。长期维护请遵循压缩包内《智能体更新提示词.md》和《更新日历与数据口径.md》。</div>
+</div>
+<script>
+const INDEX_DATA={"H30269": {"name": "红利低波", "full": "中证红利低波动指数", "provider": "中证指数", "count": 50, "rebalance": "每年", "snapshot": "动态读取中证官方权重文件", "factsheet": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/H30269factsheet.pdf", "method": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/H30269_Index_Methodology_cn.pdf", "lix": "https://www.lixinger.com/equity/index/detail/csi/H30269/1730269/constituents/weightings?granularity=d", "sheet": {"bank": 46, "pe": 8.57, "pePct": 79.22, "pb": 0.88, "pbPct": 63.82, "dy": 4.32, "dyOpp": 5.93, "dyPct": 31.57, "label": "中高估", "peRp": 9.96, "peRpPct": 22.75, "dyRpPct": 55.69, "rpLabel": "中等"}, "official": {"date": "2026-08-31", "pe": 8.11, "pb": 0.73, "dy": 4.79}, "public": {"date": "2026-09-11", "pe": 8.19, "pb": null, "dy": null, "pePct": 73.83, "source": "理杏仁·等权PE"}, "cons": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/H30269cons.xls", "weightFile": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/closeweight/H30269closeweight.xls", "indicator": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/indicator/H30269indicator.xls"}, "930740": {"name": "300红利低波", "full": "沪深300红利低波动指数", "provider": "中证指数", "count": 50, "rebalance": "每半年", "snapshot": "2026-08-31（内置官方权重快照）", "factsheet": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/930740factsheet.pdf", "method": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/930740_Index_Methodology_cn.pdf", "lix": "https://www.lixinger.com/equity/index/detail/csi/930740/930740/constituents/weightings?granularity=d", "sheet": {"bank": 28, "pe": 9.13, "pePct": 89.51, "pb": 0.89, "pbPct": 63.81, "dy": 4.27, "dyOpp": 4.87, "dyPct": 38.11, "label": "中低估", "peRp": 9.24, "peRpPct": 18.16, "dyRpPct": 77.49, "rpLabel": "低估"}, "official": {"date": "2026-08-31", "pe": 8.95, "pb": 0.78, "dy": 4.65}, "public": {"date": "2026-09-11", "pe": 8.93, "pb": null, "dy": null, "pePct": 61.71, "source": "理杏仁·等权PE"}, "cons": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/930740cons.xls", "weightFile": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/closeweight/930740closeweight.xls", "indicator": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/indicator/930740indicator.xls"}, "930955": {"name": "红利低波100", "full": "中证红利低波动100指数", "provider": "中证指数", "count": 100, "rebalance": "每季度", "snapshot": "动态读取中证官方权重文件", "factsheet": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/930955factsheet.pdf", "method": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/20231208180204-930955_Index_Methodology_cn.pdf", "lix": "https://www.lixinger.com/equity/index/detail/csi/930955/930955/constituents/weightings?granularity=d", "sheet": {"bank": 21, "pe": 9.14, "pePct": 86.57, "pb": 0.91, "pbPct": 67.59, "dy": 4.29, "dyOpp": 5.42, "dyPct": 27.08, "label": "中高估", "peRp": 9.23, "peRpPct": 24.95, "dyRpPct": 61.62, "rpLabel": "低估"}, "official": {"date": "2026-08-31", "pe": 8.85, "pb": 0.78, "dy": 4.6}, "public": {"date": "2026-09-11", "pe": 9.84, "pb": null, "dy": null, "pePct": 80.85, "source": "理杏仁·等权PE"}, "cons": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/930955cons.xls", "weightFile": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/closeweight/930955closeweight.xls", "indicator": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/indicator/930955indicator.xls"}, "SPCLLHCP": {"name": "标普中国A股大盘红利低波50", "full": "S&P China A-Share LargeCap Low Volatility High Dividend 50 Index", "provider": "标普道琼斯指数", "count": 50, "rebalance": "每半年（1月/7月）", "snapshot": "2026-06-30（515450中报完整指数投资持仓代理）", "factsheet": "https://www.spglobal.com/spdji/zh/indices/dividends-factors/sp-china-a-share-largecap-low-volatility-high-dividend-50-index/", "method": "https://www.spglobal.com/spdji/zh/documents/methodologies/methodology-sp-low-volatility-high-dividend-indices.pdf", "lix": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-04-22/515450_20260422_2O54.pdf", "sheet": {"bank": null, "pe": 9.52, "pePct": 100.0, "pb": 0.92, "pbPct": 100.0, "dy": 4.27, "dyOpp": 5.5, "dyPct": 5.47, "label": "高估", "peRp": 8.79, "peRpPct": 0.0, "dyRpPct": 50.15, "rpLabel": "高估"}, "official": {"date": "—", "pe": null, "pb": null, "dy": null}, "public": {"date": "—", "pe": null, "pb": null, "dy": null, "pePct": null, "source": "标普官方页"}, "cons": "https://www.spglobal.com/spdji/zh/indices/dividends-factors/sp-china-a-share-largecap-low-volatility-high-dividend-50-index/", "weightFile": "", "indicator": ""}, "931468": {"name": "红利质量", "full": "中证红利质量指数", "provider": "中证指数", "count": 50, "rebalance": "每半年", "snapshot": "动态读取中证官方权重文件", "factsheet": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/931468factsheet.pdf", "method": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/20231208180546-931468_Index_Methodology_cn.pdf", "lix": "https://www.lixinger.com/equity/index/detail/csi/931468/931468/constituents/weightings?granularity=d", "sheet": {"bank": 0, "pe": 16.92, "pePct": 34.38, "pb": 2.92, "pbPct": 23.97, "dy": 2.8, "dyOpp": 3.29, "dyPct": 58.04, "label": "低估", "peRp": 4.19, "peRpPct": 77.29, "dyRpPct": 77.6, "rpLabel": "低估"}, "official": {"date": "2026-08-31", "pe": 19.22, "pb": 3.39, "dy": 2.73}, "public": {"date": "2026-09-11", "pe": 17.37, "pb": null, "dy": null, "pePct": 59.78, "source": "理杏仁·正数等权PE"}, "cons": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/931468cons.xls", "weightFile": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/closeweight/931468closeweight.xls", "indicator": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/indicator/931468indicator.xls"}, "931446": {"name": "东证红利低波", "full": "中证东方红红利低波动指数", "provider": "中证指数", "count": 100, "rebalance": "每半年", "snapshot": "动态读取中证官方权重文件", "factsheet": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/931446factsheet.pdf", "method": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/indices/detail/files/zh_CN/20231208180546-931446_Index_Methodology_cn.pdf", "lix": "https://www.lixinger.com/equity/index/detail/csi/931446/931446/constituents/weightings?granularity=d", "sheet": {"bank": 36, "pe": 8.66, "pePct": 86.29, "pb": 0.84, "pbPct": 73.21, "dy": 4.1, "dyOpp": 5.44, "dyPct": 20.25, "label": "中高估", "peRp": 9.83, "peRpPct": 19.63, "dyRpPct": 47.66, "rpLabel": "中等"}, "official": {"date": "2026-08-31", "pe": 8.42, "pb": 0.72, "dy": 4.26}, "public": {"date": "2026-09-11", "pe": 8.95, "pb": null, "dy": null, "pePct": 40.77, "source": "理杏仁·等权PE"}, "cons": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/931446cons.xls", "weightFile": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/closeweight/931446closeweight.xls", "indicator": "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/indicator/931446indicator.xls"}};
+const STATIC={'930740':[{"code": "000651", "name": "格力电器", "market": "SZ", "weight": 4.34, "star": false}, {"code": "000333", "name": "美的集团", "market": "SZ", "weight": 3.43, "star": false}, {"code": "000895", "name": "双汇发展", "market": "SZ", "weight": 3.42, "star": false}, {"code": "600941", "name": "中国移动", "market": "SH", "weight": 2.82, "star": false}, {"code": "601668", "name": "中国建筑", "market": "SH", "weight": 2.8, "star": false}, {"code": "601006", "name": "大秦铁路", "market": "SH", "weight": 2.72, "star": false}, {"code": "600023", "name": "浙能电力", "market": "SH", "weight": 2.71, "star": false}, {"code": "001965", "name": "招商公路", "market": "SZ", "weight": 2.69, "star": false}, {"code": "600019", "name": "宝钢股份", "market": "SH", "weight": 2.59, "star": false}, {"code": "601728", "name": "中国电信", "market": "SH", "weight": 2.55, "star": false}, {"code": "600795", "name": "国电电力", "market": "SH", "weight": 2.51, "star": false}, {"code": "600690", "name": "海尔智家", "market": "SH", "weight": 2.46, "star": false}, {"code": "601186", "name": "中国铁建", "market": "SH", "weight": 2.26, "star": false}, {"code": "600018", "name": "上港集团", "market": "SH", "weight": 2.23, "star": false}, {"code": "600900", "name": "长江电力", "market": "SH", "weight": 2.19, "star": false}, {"code": "600886", "name": "国投电力", "market": "SH", "weight": 2.16, "star": false}, {"code": "000858", "name": "五粮液", "market": "SZ", "weight": 2.14, "star": false}, {"code": "601766", "name": "中国中车", "market": "SH", "weight": 2.14, "star": false}, {"code": "600027", "name": "华电国际", "market": "SH", "weight": 2.0, "star": false}, {"code": "000999", "name": "华润三九", "market": "SZ", "weight": 1.95, "star": false}, {"code": "601018", "name": "宁波港", "market": "SH", "weight": 1.88, "star": false}, {"code": "688009", "name": "中国通号", "market": "SH", "weight": 1.88, "star": true}, {"code": "000538", "name": "云南白药", "market": "SZ", "weight": 1.86, "star": false}, {"code": "600519", "name": "贵州茅台", "market": "SH", "weight": 1.85, "star": false}, {"code": "600050", "name": "中国联通", "market": "SH", "weight": 1.82, "star": false}, {"code": "600674", "name": "川投能源", "market": "SH", "weight": 1.81, "star": false}, {"code": "601998", "name": "中信银行", "market": "SH", "weight": 1.8, "star": false}, {"code": "600919", "name": "江苏银行", "market": "SH", "weight": 1.79, "star": false}, {"code": "601229", "name": "上海银行", "market": "SH", "weight": 1.79, "star": false}, {"code": "000001", "name": "平安银行", "market": "SZ", "weight": 1.77, "star": false}, {"code": "601800", "name": "中国交建", "market": "SH", "weight": 1.73, "star": false}, {"code": "601838", "name": "成都银行", "market": "SH", "weight": 1.71, "star": false}, {"code": "601009", "name": "南京银行", "market": "SH", "weight": 1.65, "star": false}, {"code": "601169", "name": "北京银行", "market": "SH", "weight": 1.64, "star": false}, {"code": "601328", "name": "交通银行", "market": "SH", "weight": 1.59, "star": false}, {"code": "600036", "name": "招商银行", "market": "SH", "weight": 1.58, "star": false}, {"code": "601166", "name": "兴业银行", "market": "SH", "weight": 1.58, "star": false}, {"code": "601939", "name": "建设银行", "market": "SH", "weight": 1.56, "star": false}, {"code": "600015", "name": "华夏银行", "market": "SH", "weight": 1.54, "star": false}, {"code": "601398", "name": "工商银行", "market": "SH", "weight": 1.53, "star": false}, {"code": "003816", "name": "中国广核", "market": "SZ", "weight": 1.51, "star": false}, {"code": "601988", "name": "中国银行", "market": "SH", "weight": 1.46, "star": false}, {"code": "601658", "name": "邮储银行", "market": "SH", "weight": 1.43, "star": false}, {"code": "601818", "name": "光大银行", "market": "SH", "weight": 1.4, "star": false}, {"code": "601916", "name": "浙商银行", "market": "SH", "weight": 1.4, "star": false}, {"code": "601607", "name": "上海医药", "market": "SH", "weight": 1.4, "star": false}, {"code": "600016", "name": "民生银行", "market": "SH", "weight": 1.39, "star": false}, {"code": "601816", "name": "京沪高铁", "market": "SH", "weight": 1.38, "star": false}, {"code": "600926", "name": "杭州银行", "market": "SH", "weight": 1.35, "star": false}, {"code": "600999", "name": "招商证券", "market": "SH", "weight": 0.82, "star": false}],'SPCLLHCP':[{"code": "000651", "name": "格力电器", "market": "SZ", "weight": 4.08, "star": false}, {"code": "600642", "name": "申能股份", "market": "SH", "weight": 3.65, "star": false}, {"code": "600023", "name": "浙能电力", "market": "SH", "weight": 3.64, "star": false}, {"code": "600177", "name": "雅戈尔", "market": "SH", "weight": 3.61, "star": false}, {"code": "601088", "name": "中国神华", "market": "SH", "weight": 3.06, "star": false}, {"code": "001286", "name": "陕西能源", "market": "SZ", "weight": 2.75, "star": false}, {"code": "600350", "name": "山东高速", "market": "SH", "weight": 2.73, "star": false}, {"code": "000895", "name": "双汇发展", "market": "SZ", "weight": 2.71, "star": false}, {"code": "600352", "name": "浙江龙盛", "market": "SH", "weight": 2.7, "star": false}, {"code": "601668", "name": "中国建筑", "market": "SH", "weight": 2.62, "star": false}, {"code": "000333", "name": "美的集团", "market": "SZ", "weight": 2.57, "star": false}, {"code": "002032", "name": "苏泊尔", "market": "SZ", "weight": 2.46, "star": false}, {"code": "600941", "name": "中国移动", "market": "SH", "weight": 2.42, "star": false}, {"code": "601298", "name": "青岛港", "market": "SH", "weight": 2.37, "star": false}, {"code": "601838", "name": "成都银行", "market": "SH", "weight": 2.36, "star": false}, {"code": "001965", "name": "招商公路", "market": "SZ", "weight": 2.27, "star": false}, {"code": "601006", "name": "大秦铁路", "market": "SH", "weight": 2.26, "star": false}, {"code": "600015", "name": "华夏银行", "market": "SH", "weight": 2.22, "star": false}, {"code": "000858", "name": "五粮液", "market": "SZ", "weight": 2.2, "star": false}, {"code": "600887", "name": "伊利股份", "market": "SH", "weight": 2.19, "star": false}, {"code": "601728", "name": "中国电信", "market": "SH", "weight": 2.11, "star": false}, {"code": "600919", "name": "江苏银行", "market": "SH", "weight": 2.07, "star": false}, {"code": "601169", "name": "北京银行", "market": "SH", "weight": 2.07, "star": false}, {"code": "600900", "name": "长江电力", "market": "SH", "weight": 2.01, "star": false}, {"code": "600377", "name": "宁沪高速", "market": "SH", "weight": 1.89, "star": false}, {"code": "600519", "name": "贵州茅台", "market": "SH", "weight": 1.86, "star": false}, {"code": "601328", "name": "交通银行", "market": "SH", "weight": 1.86, "star": false}, {"code": "000001", "name": "平安银行", "market": "SZ", "weight": 1.8, "star": false}, {"code": "601939", "name": "建设银行", "market": "SH", "weight": 1.79, "star": false}, {"code": "600873", "name": "梅花生物", "market": "SH", "weight": 1.78, "star": false}, {"code": "601818", "name": "光大银行", "market": "SH", "weight": 1.77, "star": false}, {"code": "601229", "name": "上海银行", "market": "SH", "weight": 1.74, "star": false}, {"code": "601658", "name": "邮储银行", "market": "SH", "weight": 1.74, "star": false}, {"code": "601916", "name": "浙商银行", "market": "SH", "weight": 1.74, "star": false}, {"code": "601988", "name": "中国银行", "market": "SH", "weight": 1.72, "star": false}, {"code": "600016", "name": "民生银行", "market": "SH", "weight": 1.7, "star": false}, {"code": "600028", "name": "中国石化", "market": "SH", "weight": 1.62, "star": false}, {"code": "601009", "name": "南京银行", "market": "SH", "weight": 1.59, "star": false}, {"code": "601166", "name": "兴业银行", "market": "SH", "weight": 1.58, "star": false}, {"code": "601398", "name": "工商银行", "market": "SH", "weight": 1.39, "star": false}, {"code": "600886", "name": "国投电力", "market": "SH", "weight": 1.39, "star": false}, {"code": "600019", "name": "宝钢股份", "market": "SH", "weight": 1.31, "star": false}, {"code": "000423", "name": "东阿阿胶", "market": "SZ", "weight": 1.3, "star": false}, {"code": "601186", "name": "中国铁建", "market": "SH", "weight": 1.05, "star": false}, {"code": "600600", "name": "青岛啤酒", "market": "SH", "weight": 1.04, "star": false}, {"code": "601288", "name": "农业银行", "market": "SH", "weight": 0.99, "star": false}, {"code": "601000", "name": "唐山港", "market": "SH", "weight": 0.78, "star": false}, {"code": "603195", "name": "公牛集团", "market": "SH", "weight": 0.61, "star": false}, {"code": "600132", "name": "重庆啤酒", "market": "SH", "weight": 0.47, "star": false}, {"code": "603658", "name": "安图生物", "market": "SH", "weight": 0.33, "star": false}]};
+const nf=new Intl.NumberFormat('zh-CN',{maximumFractionDigits:0}); const money=v=>Number.isFinite(v)?'¥'+nf.format(Math.round(v)):'—'; const f2=v=>Number.isFinite(v)?v.toFixed(2):'—';
+let currentCode='930740', holdings=[], snapshotDate='', mode='strict', quotes={}, quoteTimes={}, quoteMeta={}, calcRows=[], backendOK=false;
+/* ===== D4 估值回撤看板 + 行情三路 UI（只读展示；不改 V1.2 既有行为） ===== */
+const NA_TEXT='暂无数据';
+const MANUAL_KEY='divManualOverride';
+const VALUATION_META={sheetAsOf:'2026-08-01',sheetSource:'课程/Wind 模板（内置快照）',officialSource:'中证指数 factsheet as-of 快照',publicSource:'理杏仁等公开页',bundledAt:'随包发布的内置快照（估值不联网抓取）',wideNote:'宽基绝对值与分位来自公开披露页（百分位 baifenwei.com / 股叉叉 guchacha.com，2026-09 快照），非课程/Wind 口径；宽基风险溢价 PE 口径按 100−PE分位反推估算显示，股息率口径仍显示「暂无数据」。仅区间参考，不构成投资建议。'};
+const MARKET_DATA={"000300":{"name":"沪深300","full":"沪深300指数","provider":"中证指数","wideBase":true,"factsheet":"https://www.csindex.com.cn/#/indices/family/detail?indexCode=000300","method":"","sheet":null,"official":{"date":"—","pe":null,"pb":null,"dy":null},"public":{"date":"2026-09-15","pe":13.35,"pb":1.42,"dy":2.85,"pePct":63.8,"pbPct":38.5,"dyPct":69.1,"source":"百分位 baifenwei.com·估算·2026-09-15（PE/PB近10年分位）","url":"https://baifenwei.com/index/hs300/","source2":"股叉叉 guchacha.com·估算·2026-09-14（股息率分位为上市以来口径）","url2":"https://guchacha.com/index-valuation/000300","cross":"中证指数（经 CEIC 转载）日度快照 2026-09-04：PE 14.87 / PB 1.41"}},"000905":{"name":"中证500","full":"中证500指数","provider":"中证指数","wideBase":true,"factsheet":"https://www.csindex.com.cn/#/indices/family/detail?indexCode=000905","method":"","sheet":null,"official":{"date":"—","pe":null,"pb":null,"dy":null},"public":{"date":"2026-09-15","pe":32.42,"pb":2.35,"dy":1.37,"pePct":77.7,"pbPct":78.1,"dyPct":71.9,"source":"百分位 baifenwei.com·估算·2026-09-15（PE/PB近10年分位）","url":"https://baifenwei.com/index/zz500/","source2":"股叉叉 guchacha.com·估算·2026-09-14（股息率分位为上市以来口径）","url2":"https://guchacha.com/index-valuation/000905","cross":"—"}},"000852":{"name":"中证1000","full":"中证1000指数","provider":"中证指数","wideBase":true,"factsheet":"https://www.csindex.com.cn/#/indices/family/detail?indexCode=000852","method":"","sheet":null,"official":{"date":"—","pe":null,"pb":null,"dy":null},"public":{"date":"2026-09-15","pe":42.66,"pb":2.35,"dy":1.11,"pePct":69.8,"pbPct":43.3,"dyPct":67.9,"source":"百分位 baifenwei.com·估算·2026-09-15（PE/PB近10年分位）","url":"https://baifenwei.com/index/zz1000/","source2":"股叉叉 guchacha.com·估算·2026-09-14（股息率分位为上市以来口径）","url2":"https://guchacha.com/index-valuation/000852","cross":"—"}}};
+let manualOverride={}, drawdownBoard={}, drawdownMeta={asOf:'',note:'',verified:false};
+function vEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function loadManualOverride(){try{manualOverride=JSON.parse(localStorage.getItem(MANUAL_KEY)||'{}')||{}}catch(e){manualOverride={}}}
+function saveManualOverride(){try{localStorage.setItem(MANUAL_KEY,JSON.stringify(manualOverride))}catch(e){}}
+function isManual(code){return +manualOverride[code]>0}
+function effectivePrice(code){const m=+manualOverride[code];if(m>0)return m;const q=+quotes[code];return q>0?q:null}
+function quoteInfo(code){const m=quoteMeta[code]||{};if(isManual(code))return Object.assign({},m,{source:'手动覆盖（高级异常处理）',status:'MANUAL_OVERRIDE',manualOverride:true,manualPrice:+manualOverride[code],stale:false});return m}
+function quoteBadge(m){if(!m||!m.source)return '<span class="small muted">待行情</span>';const st=m.status||'LIVE';const cls=st==='LIVE'?'ok':(st==='DEGRADED'||st==='MANUAL_OVERRIDE')?'warn':st==='STALE_BLOCKED'?'bad':'';let sub=`<b>${vEsc(m.source)}</b><br><span class="small">${vEsc(m.market_time||m.fetched_at||'—')}</span>`;if(m.dataDate)sub+=`<div class="small">数据日期 ${vEsc(m.dataDate)}</div>`;if(m.manualOverride)sub+=`<div class="small">覆盖价 ${f2(m.manualPrice)} · 不进账本定价</div>`;if(m.cache&&m.cacheAgeSeconds!=null)sub+=`<div class="small">缓存 ${Math.round(m.cacheAgeSeconds/3600)} 小时前${m.stale?' · 陈旧':''}</div>`;if(m.errorCode)sub+=`<div class="small muted">${vEsc(m.errorCode)}</div>`;return `<span class="badge ${cls}" data-status="${vEsc(st)}">${vEsc(st)}</span><br>${sub}`}
+function renderManualRows(){const tb=document.getElementById('manualRows');if(!tb)return;if(!holdings.length){tb.innerHTML='<tr><td colspan="6" class="small muted">尚未载入成分权重。</td></tr>';return}tb.innerHTML=holdings.map(h=>{const m=quoteInfo(h.code);return `<tr><td>${h.code}</td><td>${h.name}</td><td>${quotes[h.code]?f2(quotes[h.code]):'—'}</td><td>${m.status||'—'}</td><td><input class="manual-price" data-code="${h.code}" type="number" step="0.01" value="${isManual(h.code)?manualOverride[h.code]:''}" placeholder="不改"></td><td><button type="button" data-clear="${h.code}">清除</button></td></tr>`}).join('');tb.querySelectorAll('.manual-price').forEach(x=>x.onchange=e=>setManualPrice(e.target.dataset.code,+e.target.value));tb.querySelectorAll('button[data-clear]').forEach(x=>x.onclick=()=>setManualPrice(x.dataset.clear,0));const cnt=document.getElementById('manualCount');if(cnt)cnt.textContent='当前手动覆盖：'+Object.keys(manualOverride).length+' 只（仅本机，不进账本定价）'}
+function setManualPrice(code,v){if(v>0)manualOverride[code]=v;else delete manualOverride[code];saveManualOverride();renderManualRows();calc();renderRows();updateQuoteStatus()}
+async function loadDrawdownBoard(){try{const r=await fetch('/api/drawdown',{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();const map={};(j.indices||[]).forEach(x=>{map[x.code]=x});drawdownBoard=map;drawdownMeta={asOf:j.asOf||'',note:j.note||'',verified:!!j.verified}}catch(e){drawdownBoard={};drawdownMeta={asOf:'',note:'回撤核验数据不可用（'+e.message+'）',verified:false}}renderValuation()}
+function vLayer(tag,html){return `<div class="layer"><span class="badge">${tag}</span> ${html}</div>`}
+loadManualOverride();
+const REBALANCE_RULES={H30269:'每年12月第二个星期五的下一交易日', '930740':'每年6月、12月第二个星期五的下一交易日', '930955':'每年3月、6月、9月、12月第二个星期五的下一交易日', '931468':'每年6月、12月第二个星期五的下一交易日', '931446':'每年6月、12月第二个星期五的下一交易日', SPCLLHCP:'每年1月、7月半年度再平衡；具体生效日按标普官方方法与公告'};
+function pct(v){return v==null?'—':Number(v).toFixed(2)+'%'} function val(v,d=2){return v==null?'—':Number(v).toFixed(d)}
+function marketOf(code,ex=''){ex=String(ex).toLowerCase(); if(ex.includes('上海')||ex.includes('shanghai')||ex==='sh')return 'SH';if(ex.includes('深圳')||ex.includes('shenzhen')||ex==='sz')return 'SZ';return String(code).startsWith(('6'))?'SH':'SZ'}
+function isStar(code){return String(code).startsWith('688')}
+const VCOLOR={low:{cls:'vlow',text:'偏低'},mid:{cls:'vmid',text:'中性'},high:{cls:'vhigh',text:'偏高'}};
+function vRank(n){return n<30?'low':(n>80?'high':'mid')}
+function vTitle(parts){return vEsc(parts.filter(x=>x!=null&&x!=='').join(' ｜ '))}
+function vPeakTag(highestDate,refDate){if(!highestDate)return null;const h=String(highestDate).slice(0,7),r=String(refDate||'').slice(0,7)||new Date().toISOString().slice(0,7);const hm=+h.slice(0,4)*12+(+h.slice(5,7)),rm=+r.slice(0,4)*12+(+r.slice(5,7));const dm=rm-hm;if(!(dm>=0))return {ym:h,text:'日期存疑'};if(dm<12)return {ym:h,text:'近期高点'};return {ym:h,text:Math.floor(dm/12)+'年前高点'}}
+function vNumCell(v,title){const t=title?` title="${vTitle([title])}"`:'';return (v==null||v===''||isNaN(Number(v)))?`<span class="vna"${t}>${NA_TEXT}</span>`:`<span${t}>${Number(v).toFixed(2)}</span>`}
+function vPctPick(sVal,sProv,pVal,pProv,pMeta){if(sVal!=null&&!isNaN(Number(sVal)))return {v:sVal,prov:sProv||'课程10年分位'};if(pVal!=null&&!isNaN(Number(pVal)))return {v:pVal,prov:pProv||'公开估算',est:true,source:(pMeta||{}).source||'',date:(pMeta||{}).date||'',url:(pMeta||{}).url||'',source2:(pMeta||{}).source2||'',url2:(pMeta||{}).url2||'',period:(pMeta||{}).period||''};return null}
+function vPctCell(rec){if(!rec)return `<span class="vna" title="${vTitle(['无授权同口径来源，按证据门显示暂无数据'])}">${NA_TEXT}</span>`;const n=Number(rec.v),k=VCOLOR[vRank(n)];const t=vTitle(['口径：'+rec.prov,rec.source,rec.date,rec.url,rec.source2,rec.url2]);return `<span class="${k.cls}" title="${t}">${n.toFixed(2)}% <span class="vtag">${k.text}</span>${rec.est?' <span class="vtag">估算</span>':''}${rec.period?' <span class="vtag">'+rec.period+'</span>':''}</span>`}
+function renderValuation(){
+  const wide=Object.entries(MARKET_DATA),div=Object.entries(INDEX_DATA);
+  const rowHtml=(code,d)=>{const s=d.sheet,o=d.official||{},p=d.public||{},dd=drawdownBoard[code]||{};
+    const naReason=dd.reason||'未取得授权且同口径（价格指数·收盘）的历史收盘序列，双源核验不可执行';
+    const close=vNumCell(dd.currentClose,dd.currentCloseDate?('收盘日 '+dd.currentCloseDate):naReason);
+    const peak=(dd.drawdown==null||dd.highestClose==null)?null:vPeakTag(dd.highestDate,dd.currentCloseDate);
+    const ddTxt=dd.drawdown==null?`<span class="vna" title="${vTitle([naReason])}">${NA_TEXT}</span>`:`<span title="${vTitle(['最高收盘 '+dd.highestClose+'（'+(dd.highestDate||'日期未知·快照')+'）'])}">${(dd.drawdown*100).toFixed(2)}%</span>`+(peak?`<div class="small">最高 ${vEsc(String(dd.highestClose))}（${peak.ym==='日期存疑'?'日期未知·快照':peak.ym}） <span class="vtag">${peak.text}</span></div>`:(dd.highestClose!=null?`<div class="small">最高 ${vEsc(String(dd.highestClose))}（日期未知·快照）</div>`:''));
+    const pePct=vPctPick(s?s.pePct:null,'课程10年分位',p.pePct,'公开估算·PE分位',p);
+    const pbPct=vPctPick(s?s.pbPct:null,'课程10年分位',p.pbPct,'公开估算·PB分位',p);
+    const pDy=Object.assign({},p,{source:p.source2||p.source,url:p.url2||p.url,period:'上市以来'});
+    const dyPct=vPctPick(s?s.dyPct:null,'课程10年分位',p.dyPct,'公开估算·股息率分位（上市以来口径）',pDy);
+    const rpPe=(s&&s.peRpPct!=null)?{v:s.peRpPct,prov:'课程10年分位·风险溢价(PE口径)'}:(()=>{const r=vPctPick(null,'',pePct&&pePct.v!=null?pePct.v:null,'',null);if(!r)return null;return {v:+(100-Number(r.v)).toFixed(2),prov:'公开估算·风险溢价(PE口径)反推＝100−PE分位',est:true,source:'公式反推（同参考站口径：国债扰动小，按 PE 分位反推）',date:'',url:''};})();
+    const rpDy=(s&&s.dyRpPct!=null)?{v:s.dyRpPct,prov:'课程10年分位·风险溢价(股息率口径)'}:null;
+    const explain=s?`<b>${vEsc(s.label)}</b> · 风险溢价 ${vEsc(s.rpLabel)}<div class="small">银行占比 ${s.bank==null?NA_TEXT:s.bank+'%'}｜PE风险溢价 ${val(s.peRp)}（分位 ${pct(s.peRpPct)}）｜股息率机会值 ${val(s.dyOpp)}%｜股息风险溢价分位 ${pct(s.dyRpPct)}</div><div class="small muted">课程口径 ${VALUATION_META.sheetAsOf}；公开估算口径不同，不合并分位</div>`:`<b>市场环境（宽基）</b><div class="small muted">${vEsc(VALUATION_META.wideNote||'')}</div>`;
+    const meta=`<div class="small">课程 ${s?VALUATION_META.sheetAsOf:NA_TEXT}｜官方 ${vEsc(o.date||NA_TEXT)}${o.pe!=null?('（PE '+val(o.pe)+'）'):''}｜估算 ${vEsc(p.date||NA_TEXT)}${p.source?('·'+vEsc(p.source)):''}</div><a target="_blank" href="${vEsc(d.factsheet||'')}">官方核验入口</a>`;
+    return `<tr><td>${vEsc(d.name)}<div class="small muted">${vEsc(code)}</div></td><td>${close}</td><td>${ddTxt}</td><td>${vPctCell(pePct)}</td><td>${vPctCell(pbPct)}</td><td>${vPctCell(dyPct)}</td><td>${vPctCell(rpPe)}</td><td>${vPctCell(rpDy)}</td><td class="layer" style="max-width:360px">${explain}</td><td>${meta}</td></tr>`};
+  const wb=document.getElementById('valuationRows');if(wb)wb.innerHTML=wide.map(([c,d])=>rowHtml(c,d)).join('');
+  const db=document.getElementById('valuationDivRows');if(db)db.innerHTML=div.map(([c,d])=>rowHtml(c,d)).join('');
+  const legend='<div>口径/日期：课程/Wind 模板 '+VALUATION_META.sheetAsOf+'（10年分位与风险溢价）｜官方 factsheet as-of 快照（绝对值，无十年分位）｜公开估算（口径与观察期不同，分区展示）。抓取时间：'+VALUATION_META.bundledAt+'；估值随包发布、不联网抓取。分档：<span class="vlow">偏低 &lt;30%</span>／<span class="vmid">中性 30~80%</span>／<span class="vhigh">偏高 &gt;80%</span>（同时文字标识，不依赖颜色）。三层口径分区展示、不合并分位。</div>';
+  const layers=vLayer('课程','Wind 模板内置快照，as-of '+VALUATION_META.sheetAsOf+'（10年分位 / 风险溢价）')+vLayer('官方','中证指数 factsheet as-of 快照（绝对 PE/PB/股息率，无分位）')+vLayer('第三方','理杏仁 / 雪球 / 同花顺 / 百分位 / 股叉叉等公开页（口径与观察期不同，估算分区展示）');
+  const ddNote=(typeof drawdownMeta!=='undefined'&&drawdownMeta.note)?`<div>回撤数据：${vEsc(drawdownMeta.note)}（as-of ${vEsc(drawdownMeta.asOf||'—')}）</div>`:'';
+  const fw=document.getElementById('valuationFootnoteWide');if(fw)fw.innerHTML=legend+layers+ddNote+'<div>公开估算来源（宽基）：① <a target="_blank" href="https://baifenwei.com/index/hs300/">百分位 baifenwei.com</a>／<a target="_blank" href="https://baifenwei.com/index/zz500/">中证500</a>／<a target="_blank" href="https://baifenwei.com/index/zz1000/">中证1000</a>：PE/PB 近 10 年分位，2026-09-15；② <a target="_blank" href="https://guchacha.com/index-valuation/000300">股叉叉 guchacha.com</a>：股息率及其分位，2026-09-14（分位为「上市以来」口径，与近 10 年口径不完全可比）。</div><div>宽基风险溢价：PE 口径为 100−PE分位公式反推估算（同参考站口径）；股息率口径无授权同口径来源，仍显示「暂无数据」（不估算、不补造）。</div><div>交叉核对：中证指数（经 CEIC 转载）日度快照 2026-09-04，沪深300 PE 14.87 / PB 1.41。</div>';
+  const fd=document.getElementById('valuationFootnoteDiv');if(fd)fd.innerHTML=legend+layers+ddNote+'<div>公开估算来源：理杏仁 lixinger.com（PE、股息率总市值加权，2026-09-04~09-15）；ETF.run 辅助对照。仅区间参考。</div>';
+}
+function sourceHtml(d){document.getElementById('idxTitle').textContent=`${d.name}（${currentCode}）`;document.getElementById('idxBadges').innerHTML=`<span class="badge">${d.provider}</span><span class="badge">${d.count}只</span><span class="badge">调样：${d.rebalance}</span><span class="badge warn">${REBALANCE_RULES[currentCode]||''}</span>`;let off=`<a target=_blank href="${d.factsheet}">官方指数页/事实表</a><a target=_blank href="${d.method}">官方编制方案</a>`;if(d.cons)off+=`<a target=_blank href="${d.cons}">官方完整成分XLS</a><a target=_blank href="${d.weightFile}">官方完整权重XLS</a><a target=_blank href="${d.indicator}">官方估值历史XLS</a>`;document.getElementById('officialLinks').innerHTML=off;let cross=`<a target=_blank href="${d.lix}">理杏仁交叉核验</a>`;if(d.provider==='中证指数')cross+=`<a target=_blank href="https://www.etf.run/index/CSI/${currentCode}">ETF.run口径对照</a>`;if(currentCode==='SPCLLHCP')cross+='<a target=_blank href="https://www.morningstar.cn/fund/515450.html">晨星515450持仓复核</a><a target=_blank href="https://basic.10jqka.com.cn/515450/asset.html">同花顺515450持仓复核</a>';document.getElementById('crossLinks').innerHTML=cross;document.getElementById('downloadWeight').href=d.weightFile||d.factsheet;document.getElementById('downloadCons').href=d.cons||d.factsheet;document.getElementById('loadOfficialBtn').style.display=d.provider==='中证指数'?'inline-block':'none';
+ if(d.provider==='中证指数')document.getElementById('sourceNote').innerHTML=`<b>主数据源：</b>中证指数官方。正式模式由本地服务从中证官方 closeweight XLS 拉取并保存到项目 cache/official；解析后的清单再保存到 cache/parsed。官方暂时不可达时自动使用磁盘旧缓存，避免“空缓存”。第三方只用于交叉核对，不覆盖官方成分。`;
+ else document.getElementById('sourceNote').innerHTML=`<b>主数据源：</b>标普官方页面核对成分；V1.2计算权重采用南方515450截至2026-06-30的完整指数投资持仓做代理。前十大已由晨星、同花顺、新浪交叉一致验证。<b>代理权重不等同于标普官方每日指数权重</b>。`;
+}
+function initSelect(){const s=document.getElementById('indexSelect');s.innerHTML='';for(const[c,d]of Object.entries(INDEX_DATA)){const o=document.createElement('option');o.value=c;o.textContent=d.name+'（'+c+'）';s.appendChild(o)}s.value=currentCode}
+async function selectIndex(code){
+ currentCode=code;quotes={};quoteTimes={};quoteMeta={};sourceHtml(INDEX_DATA[code]);renderValuation();
+ holdings=[];snapshotDate='';
+ // 1) 正式本地服务的磁盘解析缓存（跨浏览器持久）
+ if(backendOK){
+   try{let r=await fetch('/api/holdings?code='+encodeURIComponent(code),{cache:'no-store'});if(r.ok){let j=await r.json();if(j.holdings?.length){holdings=j.holdings;snapshotDate=j.date||j.saved_at||'磁盘缓存';setStatus(`已载入磁盘持久缓存 ${holdings.length} 只（${j.source||'parsed-cache'}）`);renderAll();refreshQuotes();return}}}catch(e){}
+ }
+ // 2) 包内内置快照
+ if(STATIC[code]){holdings=STATIC[code];snapshotDate=INDEX_DATA[code].snapshot;setStatus(code==='SPCLLHCP'?'已载入包内515450中报代理快照':'已载入包内官方权重快照');renderAll();refreshQuotes();return}
+ // 3) 浏览器 localStorage 二级缓存
+ let cached=null;try{cached=JSON.parse(localStorage.getItem('divWeight_'+code)||'null')}catch(e){};
+ if(cached&&cached.holdings?.length){holdings=cached.holdings;snapshotDate=cached.date||'浏览器缓存';setStatus('已载入浏览器二级缓存');renderAll();refreshQuotes();return}
+ // 4) 首次初始化：在线抓取官方权重并持久化
+ renderAll();setStatus('尚无解析缓存，正在初始化官方权重…');
+ if(INDEX_DATA[code].provider==='中证指数') await loadOfficialWeights(true); else setStatus('标普指数使用包内代理快照；如快照缺失请按官方 Full Constituents List 更新。',true);
+}
+
+function setStatus(msg,bad=false){document.getElementById('dataStatus').innerHTML=`${bad?'<span class=bad>':'<span class=good>'}${msg}</span><br>快照：${snapshotDate||'—'}`}
+function getBy(row,patterns){for(const [k,v] of Object.entries(row))if(patterns.some(r=>r.test(String(k))))return v;return ''}
+function parseWorkbook(buf){if(!window.XLSX)throw new Error('Excel解析组件未加载');let wb=XLSX.read(buf,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],arr=XLSX.utils.sheet_to_json(ws,{defval:''}),out=[],dates=[];for(const r of arr){let code=String(getBy(r,[/成份券代码/i,/ConstituentCode/i,/证券代码/i,/股票代码/i])).replace(/\.0$/,'').trim(); if(!/^\d{6}$/.test(code))continue;let name=String(getBy(r,[/成份券名称/i,/ConstituentName/i,/证券简称/i,/股票名称/i])).trim();let w=parseFloat(String(getBy(r,[/^权重/i,/weight/i])).replace('%',''));if(!Number.isFinite(w)||w<=0)continue;let ex=getBy(r,[/交易所/i,/Exchange/i]);let dt=String(getBy(r,[/日期/i,/Date/i])).trim();if(dt)dates.push(dt);out.push({code,name:name||code,market:marketOf(code,ex),weight:w,star:isStar(code)})}if(out.length<10)throw new Error('未识别到足够的成分权重行，请确认导入的是“closeweight”权重文件');return {holdings:out,date:dates[0]||'官方文件'}}
+async function saveParsedToDisk(parsed){
+ if(!backendOK)return;try{await fetch('/api/save-parsed',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:currentCode,...parsed,source:'official-xls-parsed'})})}catch(e){}
+}
+async function loadOfficialWeights(silent=false,force=true){
+ let d=INDEX_DATA[currentCode];if(d.provider!=='中证指数')return;let btn=document.getElementById('loadOfficialBtn');btn.disabled=true;btn.textContent='读取中…';
+ try{
+   let url=backendOK?('/api/weight?code='+encodeURIComponent(currentCode)+'&refresh='+(force?'1':'0')):d.weightFile;
+   let r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);
+   if(!window.XLSX)throw new Error('Excel解析组件未加载；联网一次后浏览器通常会缓存该组件，也可手工导入CSV');
+   let parsed=parseWorkbook(await r.arrayBuffer());
+   holdings=parsed.holdings;snapshotDate=parsed.date;localStorage.setItem('divWeight_'+currentCode,JSON.stringify(parsed));await saveParsedToDisk(parsed);
+   let src=r.headers.get('X-Data-Source')||'官方XLS';setStatus(`已载入 ${holdings.length} 只；来源：${src}`);renderAll();refreshQuotes();refreshCacheStatus();
+ }catch(e){
+   // 失败时优先保留现有快照，不清空
+   if(!holdings.length){let c=null;try{c=JSON.parse(localStorage.getItem('divWeight_'+currentCode)||'null')}catch(_){};if(c?.holdings?.length){holdings=c.holdings;snapshotDate=c.date||'浏览器缓存';renderAll()}}
+   setStatus('官方刷新失败：'+e.message+(holdings.length?'；已继续使用旧缓存，不影响测算。':'；当前无可用缓存。'),true);
+   if(!silent&&!holdings.length)alert('官方权重刷新失败，且当前没有可用缓存。请保持联网后点击“初始化/更新全部官方缓存”，或下载官方权重XLS后手工导入。');
+ }finally{btn.disabled=false;btn.textContent='读取/刷新官方权重'}
+}
+async function importFile(file){try{let parsed=parseWorkbook(await file.arrayBuffer());holdings=parsed.holdings;snapshotDate=parsed.date;localStorage.setItem('divWeight_'+currentCode,JSON.stringify(parsed));await saveParsedToDisk(parsed);setStatus(`已导入并持久化 ${holdings.length} 只成分`);renderAll();refreshQuotes();refreshCacheStatus()}catch(e){alert('导入失败：'+e.message)}}
+
+function sums(arr){return {all:arr.reduce((s,h)=>s+h.weight,0),sh:arr.filter(h=>h.market==='SH').reduce((s,h)=>s+h.weight,0),sz:arr.filter(h=>h.market==='SZ').reduce((s,h)=>s+h.weight,0)}}
+function activeHoldings(){return holdings.filter(h=>!(document.getElementById('excludeStar').checked&&h.star))}
+function targets(){let arr=activeHoldings(),s=sums(arr),map={},total=0;if(!arr.length)return {arr,s,map,total};if(mode==='course'){let sh=+document.getElementById('shBudget').value||0;if(s.sh<=0)return {arr,s,map,total:0};arr.forEach(h=>{map[h.code]=sh*h.weight/s.sh;total+=map[h.code]})}else if(mode==='strict'){total=+document.getElementById('totalBudget').value||0;arr.forEach(h=>map[h.code]=total*h.weight/s.all)}else{let sh=+document.getElementById('shBudget').value||0,sz=+document.getElementById('szBudget').value||0;total=sh+sz;arr.forEach(h=>map[h.code]=h.market==='SH'?(s.sh?sh*h.weight/s.sh:0):(s.sz?sz*h.weight/s.sz:0))}return {arr,s,map,total}}
+function legalShares(h,target,price){if(!price||price<=0)return null;let raw=target/price;if(h.star){if(raw<100)return 0;return Math.max(200,Math.round(raw))}return Math.max(0,Math.round(raw/100)*100)}
+function renderAll(){let s=sums(holdings);document.getElementById('sampleCount').textContent=holdings.length||'—';document.getElementById('weightSum').textContent=holdings.length?pct(s.all):'—';document.getElementById('shWeight').textContent=holdings.length?pct(s.sh):'—';document.getElementById('szWeight').textContent=holdings.length?pct(s.sz):'—';document.getElementById('importHint').innerHTML=holdings.length?`当前已加载 <b>${holdings.length}</b> 只；权重合计 <b>${pct(s.all)}</b>；快照/来源：${snapshotDate}。你可以点官方链接逐只核对，也可以重新读取/导入最新版。`:`当前指数还没有载入权重。中证指数可点“读取最新官方权重”；若失败，下载官方权重XLS后导入。`;calc();renderManualRows()}
+function calc(){let t=targets();calcRows=t.arr.map((h,i)=>{let target=t.map[h.code]||0,price=effectivePrice(h.code),raw=price?target/price:null,shares=legalShares(h,target,price),actual=shares==null?null:shares*price;let mw=mode==='dual'?(h.market==='SH'?(t.s.sh?h.weight/t.s.sh*100:0):(t.s.sz?h.weight/t.s.sz*100:0)):(t.s.all?h.weight/t.s.all*100:0);return {...h,rank:i+1,target,price,raw,shares,actual,modeWeight:mw}});let priced=calcRows.filter(r=>r.actual!=null),actual=priced.reduce((s,r)=>s+r.actual,0),ash=priced.filter(r=>r.market==='SH').reduce((s,r)=>s+r.actual,0),asz=priced.filter(r=>r.market==='SZ').reduce((s,r)=>s+r.actual,0);document.getElementById('targetTotal').textContent=money(t.total);document.getElementById('actualTotal').textContent=priced.length===calcRows.length?money(actual):money(actual)+'*';document.getElementById('actualSH').textContent=money(ash);document.getElementById('actualSZ').textContent=money(asz);renderRows();updateModeWarning(t);updateQuoteStatus()}
+function updateModeWarning(t){let e=document.getElementById('modeWarning');if(!holdings.length){e.innerHTML='请先载入成分权重。';return}if(mode==='course'){let sh=+document.getElementById('shBudget').value||0;e.className='note';e.innerHTML=`<b>课程原法：</b>把“沪市底仓”作为锚。输入 ${money(sh)} 后，沪市内部和深市内部仍保持指数原始权重比例；当前会反推出总底仓约 <b>${money(t.total)}</b>，其中深市理论约 <b>${money(t.total-sh)}</b>。`}else if(mode==='strict'){e.className='note';e.innerHTML=`<b>严格复制：</b>总资金 ${money(t.total)} 直接按指数权重分配；这是你说的“我就拿10万，所有成分股各买多少”的最直观模式。`}else{e.className='note warn';e.innerHTML=`<b>打新优先：</b>沪、深分别独立归一化。这样更适合做两市打新市值，但会改变指数原本的沪深比例，不再是严格复制指数。`}}
+function renderRows(){let q=(document.getElementById('search').value||'').trim().toLowerCase(),mf=document.getElementById('marketFilter').value;let rows=calcRows.filter(r=>(!q||r.code.includes(q)||r.name.toLowerCase().includes(q))&&(mf==='ALL'||r.market===mf));document.getElementById('rows').innerHTML=rows.map(r=>{let hands=r.shares==null?'—':r.star?(r.shares/100).toFixed(2):(r.shares/100).toFixed(0),diff=r.actual==null?null:r.actual-r.target;let priceCell=r.price==null?'<span class="small muted">待行情</span>':`<span class="ro-price">${f2(r.price)}</span>`+(isManual(r.code)?'<br><span class="badge warn">MANUAL_OVERRIDE</span>':'');return `<tr><td>${r.rank}</td><td><span class="pill ${r.market==='SH'?'sh':'sz'}">${r.market==='SH'?'沪':'深'}</span>${r.star?' <span class="pill star">科创</span>':''}</td><td>${r.code}</td><td><b>${r.name}</b></td><td>${pct(r.weight)}</td><td>${pct(r.modeWeight)}</td><td>${priceCell}</td><td>${quoteBadge(quoteInfo(r.code))}</td><td>${money(r.target)}</td><td>${r.raw==null?'—':f2(r.raw)}</td><td><b>${r.shares==null?'—':nf.format(r.shares)+'股'}</b></td><td>${hands}</td><td>${money(r.actual)}</td><td class="${diff>0?'amber':diff<0?'good':''}">${diff==null?'—':(diff>=0?'+':'')+money(diff)}</td></tr>`}).join('')}
+function updateQuoteStatus(){if(!holdings.length){document.getElementById('quoteStatus').innerHTML='行情：<b>0/0</b> 只；尚未载入成分权重。三路只读：腾讯主源(LIVE) → 东方财富备用(DEGRADED) → 本地缓存(CACHE/STALE_BLOCKED)；手动覆盖仅存于本机 localStorage 并标 MANUAL_OVERRIDE，不进账本定价。';return}let got=holdings.filter(h=>effectivePrice(h.code)!=null).length,counts={},latest='';holdings.forEach(h=>{const m=quoteInfo(h.code);if(m&&m.status)counts[m.status]=(counts[m.status]||0)+1;const t=m&&(m.market_time||m.fetched_at);if(t&&t>latest)latest=t});let desc=Object.entries(counts).map(([k,v])=>`${k} ${v}`).join(' / ')||'尚未取得行情';document.getElementById('quoteStatus').innerHTML=`行情：<b>${got}/${holdings.length}</b> 只；状态 ${desc}${latest?'；最新时间 '+latest:''}。三路只读：腾讯主源(LIVE) → 东方财富备用(DEGRADED) → 本地缓存(CACHE/STALE_BLOCKED)；手动覆盖仅存于本机 localStorage 并标 MANUAL_OVERRIDE，不进账本定价。`}
+async function refreshQuotes(){if(!holdings.length)return;let btn=document.getElementById('refreshBtn');btn.disabled=true;btn.textContent='行情刷新中…';
+ try{
+  if(backendOK){
+    let symbols=holdings.map(h=>(h.market==='SH'?'sh':'sz')+h.code).join(',');let r=await fetch('/api/quotes?symbols='+encodeURIComponent(symbols),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);let j=await r.json();for(const [code,x] of Object.entries(j.quotes||{})){if(x.price>0){quotes[code]=x.price;quoteTimes[code]=x.market_time||x.fetched_at||'';quoteMeta[code]={source:x.source||'未知',market_time:x.market_time||'',fetched_at:x.fetched_at||'',dataDate:x.dataDate||'',status:x.status||'LIVE',stale:!!x.stale,cache:!!x.cache,cacheAgeSeconds:x.cacheAgeSeconds==null?null:x.cacheAgeSeconds,errorCode:x.errorCode||'',attempts:x.attempts==null?null:x.attempts,ageSeconds:x.ageSeconds==null?null:x.ageSeconds}}}calc();renderManualRows();refreshCacheStatus();return;
+  }
+  await refreshQuotesDirectTencent();
+ }catch(e){console.warn('行情刷新失败',e);await refreshQuotesDirectTencent();}
+ finally{btn.disabled=false;btn.textContent='刷新当前行情';calc()}
+}
+function refreshQuotesDirectTencent(){
+ return new Promise(resolve=>{
+  let ids=holdings.map(h=>(h.market==='SH'?'sh':'sz')+h.code),chunks=[];
+  for(let i=0;i<ids.length;i+=20)chunks.push(ids.slice(i,i+20));
+  if(!chunks.length){resolve();return}
+  let done=0,finished=false;
+  const fin=()=>{if(finished)return;finished=true;try{localStorage.setItem('divQuoteCache',JSON.stringify({quotes,quoteMeta,saved_at:new Date().toISOString()}))}catch(e){};resolve()};
+  chunks.forEach((chunk,idx)=>{
+   let sc=document.createElement('script');sc.charset='gbk';sc.src='https://qt.gtimg.cn/q='+chunk.join(',')+'&_='+(Date.now()+idx);
+   sc.onload=()=>{
+    chunk.forEach(id=>{
+     let v=window['v_'+id];
+     if(typeof v==='string'){
+      let a=v.split('~'),p=parseFloat(a[3])||parseFloat(a[4]),code=id.slice(2);
+      if(p>0){
+       quotes[code]=p;let ts=a[30],mt='';
+       if(ts&&ts.length>=14)mt=`${ts.slice(0,4)}-${ts.slice(4,6)}-${ts.slice(6,8)} ${ts.slice(8,10)}:${ts.slice(10,12)}`;
+       quoteTimes[code]=mt;quoteMeta[code]={source:'腾讯直连',market_time:mt,fetched_at:new Date().toLocaleString('zh-CN',{hour12:false}),dataDate:mt?mt.slice(0,10):'',status:'LIVE',stale:false,cache:false,cacheAgeSeconds:null,errorCode:''};
+      }
+     }
+    });
+    if(++done===chunks.length)fin();
+   };
+   sc.onerror=()=>{if(++done===chunks.length)fin()};document.head.appendChild(sc);
+  });
+  setTimeout(fin,7000);
+ });
+}
+async function checkBackend(){if(location.protocol==='file:'){document.getElementById('directFileWarning').style.display='block';backendOK=false;document.getElementById('serverState').textContent='直接HTML降级模式';document.getElementById('serverDot').className='dot warn';return false}try{let r=await fetch('/api/health',{cache:'no-store'});if(!r.ok)throw 0;let j=await r.json();backendOK=!!j.ok;document.getElementById('serverState').textContent=backendOK?'本地服务正常（持久缓存已启用）':'本地服务异常';document.getElementById('serverDot').className='dot '+(backendOK?'ok':'bad');return backendOK}catch(e){backendOK=false;document.getElementById('serverState').textContent='未检测到本地服务';document.getElementById('serverDot').className='dot bad';return false}}
+async function refreshCacheStatus(){if(!backendOK){document.getElementById('weightCacheState').textContent='浏览器缓存/内置快照模式';document.getElementById('quoteCacheState').textContent='浏览器缓存';return}try{let r=await fetch('/api/cache-status',{cache:'no-store'}),j=await r.json();let ready=Object.values(j.indices||{}).filter(x=>x.parsed||x.raw).length,total=Object.keys(j.indices||{}).length;document.getElementById('weightCacheState').innerHTML=`${ready}/${total} 个指数已有磁盘缓存<br>${Object.entries(j.indices||{}).map(([c,x])=>`${c}:${x.parsed?'解析✓':x.raw?'原始✓':'空'}`).join(' · ')}`;document.getElementById('quoteCacheState').innerHTML=j.quotes?.count?`${j.quotes.count}只；${j.quotes.saved_at||'—'}`:'尚无磁盘行情缓存';document.getElementById('cacheDetail').textContent=`缓存目录：${j.cache_dir||'cache/'}；磁盘缓存不会因浏览器清缓存而消失。`}catch(e){document.getElementById('cacheDetail').textContent='缓存状态读取失败：'+e.message}}
+async function parseAndPersistIndex(code,force=false){
+ let d=INDEX_DATA[code];if(d.provider!=='中证指数')return {ok:false,skip:true};
+ if(!window.XLSX)return {ok:false,error:'Excel解析组件未加载'};
+ try{let r=await fetch(`/api/weight?code=${encodeURIComponent(code)}&refresh=${force?1:0}`,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);let parsed=parseWorkbook(await r.arrayBuffer());await fetch('/api/save-parsed',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,...parsed,source:'official-xls-parsed'})});try{localStorage.setItem('divWeight_'+code,JSON.stringify(parsed))}catch(e){};return {ok:true,count:parsed.holdings.length,date:parsed.date}}catch(e){return {ok:false,error:e.message}}
+}
+async function ensureInitialCache(){
+ if(!backendOK||!window.XLSX)return;try{let r=await fetch('/api/cache-status',{cache:'no-store'}),j=await r.json();let missing=Object.keys(INDEX_DATA).filter(c=>INDEX_DATA[c].provider==='中证指数'&&!j.indices?.[c]?.parsed);if(!missing.length)return;document.getElementById('cacheDetail').textContent=`首次初始化：正在补齐 ${missing.length} 个官方解析缓存…`;for(const c of missing)await parseAndPersistIndex(c,false);await refreshCacheStatus()}catch(e){console.warn('首次缓存初始化失败',e)}
+}
+async function initAllCaches(){if(!backendOK){alert('请通过启动工具.command / .bat 启动正式本地服务后再初始化。');return}let b=document.getElementById('initCacheBtn');b.disabled=true;b.textContent='正在更新全部官方缓存…';try{let r=await fetch('/api/prefetch?refresh=1',{cache:'no-store'}),j=await r.json();let parsedOK=0;for(const c of Object.keys(INDEX_DATA).filter(c=>INDEX_DATA[c].provider==='中证指数')){let x=await parseAndPersistIndex(c,false);if(x.ok)parsedOK++}await refreshCacheStatus();let rawOK=Object.values(j.results||{}).filter(x=>x.ok).length;alert(`缓存更新完成：官方原始XLS ${rawOK}/${Object.keys(j.results||{}).length}；解析JSON ${parsedOK}/5。\n失败项会保留旧磁盘缓存，不会清空。`);if(currentCode!=='SPCLLHCP')await selectIndex(currentCode)}catch(e){alert('初始化失败：'+e.message)}finally{b.disabled=false;b.textContent='初始化/更新全部官方缓存'}}
+
+function setMode(m){mode=m;document.querySelectorAll('.mode').forEach(x=>x.classList.toggle('active',x.querySelector('input').value===m));document.getElementById('totalField').style.display=m==='strict'?'flex':'none';document.getElementById('shField').style.display=m==='strict'?'none':'flex';document.getElementById('szField').style.display=m==='dual'?'flex':'none';calc()}
+document.addEventListener('DOMContentLoaded',async()=>{initSelect();renderValuation();sourceHtml(INDEX_DATA[currentCode]);await checkBackend();await refreshCacheStatus();ensureInitialCache();document.getElementById('loadOfficialBtn').onclick=()=>loadOfficialWeights(false,true);document.getElementById('initCacheBtn').onclick=initAllCaches;document.getElementById('cacheStatusBtn').onclick=refreshCacheStatus;document.getElementById('fileInput').onchange=e=>e.target.files[0]&&importFile(e.target.files[0]);document.getElementById('refreshBtn').onclick=refreshQuotes;document.querySelectorAll('input[name=mode]').forEach(x=>x.onchange=()=>setMode(x.value));['shBudget','szBudget','totalBudget','excludeStar'].forEach(id=>document.getElementById(id).oninput=calc);['search','marketFilter'].forEach(id=>document.getElementById(id).oninput=renderRows);document.getElementById('csvBtn').onclick=()=>{let head=['序号','市场','代码','名称','指数权重%','模式权重%','价格','行情源','行情时间','目标金额','理论股数','建议股数','手数','实际投入','偏差'];let data=calcRows.map(r=>{let qm=quoteMeta[r.code]||{};return [r.rank,r.market,r.code,r.name,r.weight,r.modeWeight.toFixed(4),r.price||'',qm.source||'',qm.market_time||qm.fetched_at||'',r.target.toFixed(2),r.raw==null?'':r.raw.toFixed(2),r.shares??'',r.star&&r.shares!=null?(r.shares/100).toFixed(2):(r.shares!=null?r.shares/100:''),r.actual==null?'':r.actual.toFixed(2),r.actual==null?'':(r.actual-r.target).toFixed(2)]});let csv='﻿'+[head,...data].map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');let b=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`${INDEX_DATA[currentCode].name}_${currentCode}_底仓下单清单.csv`;a.click();URL.revokeObjectURL(a.href)};document.getElementById('copyBtn').onclick=async()=>{let lines=calcRows.filter(r=>(r.shares||0)>0).map(r=>`${r.market} ${r.code} ${r.name}｜${r.shares}股｜参考价${r.price?.toFixed(2)||'-'}｜约${money(r.actual)}`),text=`${INDEX_DATA[currentCode].name}（${currentCode}）｜${mode}\n`+lines.join('\n');try{await navigator.clipboard.writeText(text)}catch(e){prompt('复制以下清单：',text)}};await selectIndex(currentCode)})
+</script>
+<script>
+/* ===================== D3 下单执行页（增量脚本，不改 V1.2 既有区块） ===================== */
+const DP_LABEL={PENDING:'待下单',CONFIRMED:'已确认成交',SKIPPED:'已跳过',REVIEW:'待复核'};
+const DP_KIND_LABEL={INITIAL:'首次建仓',ADD:'追加投资',REBALANCE:'全面再平衡',EXIT:'清仓退出'};
+const dpEl=id=>document.getElementById(id);
+let dpCycleId=null,dpBatchId=null,dpItems=[],dpGate=null,dpFocusIdx=0,dpView='list',dpBusy=false,dpConfirmId=null;
+const dpEsc=s=>String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+function dpNotice(msg,bad){const e=dpEl('dpHint');if(!e)return;e.className='small '+(bad?'bad':'muted');e.textContent=msg||'';}
+async function dpApi(method,path,body){
+  const opt={method:method,headers:{'Content-Type':'application/json'},cache:'no-store'};
+  if(body!==undefined&&body!==null)opt.body=JSON.stringify(body);
+  const r=await fetch(path,opt); let j=null; try{j=await r.json()}catch(e){}
+  return {status:r.status,ok:r.ok,body:j||{}};
+}
+function dpToast(btn,msg,bad){try{if(!btn||!btn.parentNode)return;const old=btn.parentNode.querySelector('.cp-toast');if(old)old.remove();const t=document.createElement('span');t.className='cp-toast'+(bad?' bad':'');t.textContent=msg;btn.insertAdjacentElement('afterend',t);setTimeout(()=>{try{t.remove()}catch(e){}},2200)}catch(e){}}
+async function dpCopy(text,label,btn){
+  try{
+    if(!navigator.clipboard)throw new Error('clipboard unavailable');
+    await navigator.clipboard.writeText(text); dpToast(btn,'已复制'+label);
+  }catch(e){ window.prompt('自动复制不可用，请手动复制'+label,text); }
+}
+function dpLine(it){
+  const qty=it.suggested_qty||0, p=it.reference_price_cents?('参考价'+(it.reference_price_cents/100).toFixed(2)):'';
+  const amt=it.reference_price_cents?('约¥'+nf.format(Math.round(qty*it.reference_price_cents/100))):'';
+  return `${it.market||''} ${it.code} ${it.name||it.code}｜${it.side}｜${qty}股｜${p}｜${amt}`;
+}
+function dpItemById(id){return dpItems.filter(x=>x.order_item_id===id)[0]}
+function dpRowButtons(it){
+  const cur=it.status;
+  if(dpConfirmId===it.order_item_id){
+    return `<span class="dp-confirm"><button class="primary" onclick="dpConfirmItem(${it.order_item_id})">确认成交</button>`+
+           `<button onclick="dpCancelConfirm()">取消</button>`+
+           `<span class="small">回车=确认 · Esc=取消 · 确认后不可逆转</span></span>`;
+  }
+  const mk=(st,label,extra)=>`<button style="padding:4px 8px;margin:1px" class="${cur===st?'primary':''}" ${extra||''} onclick="dpClick(${it.order_item_id},'${st}')">${label}</button>`;
+  const confDisabled=(cur==='CONFIRMED'||(it.suggested_qty||0)<=0)?'disabled title="已确认或建议股数为 0"':'';
+  const revertBtn=(cur==='CONFIRMED')?`<button style="padding:4px 8px;margin:1px" title="撤销该行已确认成交（需输入撤销确认四字）" onclick="dpRevertItem(${it.order_item_id})">撤销</button>`:'';
+  return mk('PENDING','待下单')+mk('CONFIRMED','已确认',confDisabled)+mk('SKIPPED','已跳过')+mk('REVIEW','待复核')+revertBtn;
+}
+function dpCopyButtons(it){
+  return `<button style="padding:4px 8px;margin:1px" onclick="dpCopy('${dpEsc(it.code)}','代码',this)">代码</button>`+
+         `<button style="padding:4px 8px;margin:1px" onclick="dpCopy('${dpEsc(it.name||it.code)}','名称',this)">名称</button>`+
+         `<button style="padding:4px 8px;margin:1px" onclick="dpCopy('${dpEsc(it.suggested_qty)}','数量',this)">数量</button>`+
+         `<button style="padding:4px 8px;margin:1px" onclick="dpCopy('${dpEsc(dpLine(it))}','整行记录',this)">整行</button>`;
+}
+function dpRender(){
+  const has=!!dpBatchId;
+  dpEl('dpListView').style.display=(has&&dpView==='list')?'block':'none';
+  dpEl('dpFocusView').style.display=(has&&dpView==='focus')?'block':'none';
+  if(!has){dpEl('dpRows').innerHTML='';dpEl('dpProgressText').textContent='尚未选择批次。';
+    dpEl('dpProgressBar').style.width='0%';dpEl('dpGateNote').style.display='none';
+    dpEl('dpCompleteBtn').disabled=true;dpEl('dpDoneWrap').style.display='none';return;}
+  const g=dpGate||{},c=g.counts||{},total=g.total||0,processed=g.processed||0;
+  const pctv=total?Math.round(processed/total*100):0, b=g.batch||{};
+  dpEl('dpProgressText').innerHTML=`批次 #${b.batch_id||dpBatchId} · ${DP_KIND_LABEL[b.kind]||b.kind||''} · revision ${g.revision||'-'} · 进度 <b>${processed}/${total}</b>（${pctv}%）：待下单 ${c.PENDING||0} / 已确认 ${c.CONFIRMED||0} / 已跳过 ${c.SKIPPED||0} / 待复核 ${c.REVIEW||0}`;
+  dpEl('dpProgressBar').style.width=pctv+'%';
+  const done=(g.gate==='done');
+  const note=dpEl('dpGateNote');note.style.display='block';
+  note.className='note '+(done?'':(g.gate==='blocked'?'red':'warn'));
+  note.innerHTML=`完成门禁：<b>${g.gate||'-'}</b>（${g.gate_reason||''}）。`+(done?'已全部处理完，可点“完成批次”。':'需全部“已确认成交/已跳过”才可通过。');
+  dpEl('dpCompleteBtn').disabled=!done||dpBusy;
+  dpEl('dpRows').innerHTML=dpItems.map((it,i)=>`<tr><td>${i+1}</td><td><span class="pill ${it.market==='SH'?'sh':it.market==='SZ'?'sz':''}">${it.market==='SH'?'沪':it.market==='SZ'?'深':'—'}</span></td><td>${it.code}</td><td><b>${it.name||it.code}</b></td><td>${it.side}</td><td>${it.suggested_qty}股</td><td>${it.reference_price_cents?(it.reference_price_cents/100).toFixed(2):'—'}</td><td>${DP_LABEL[it.status]||it.status}</td><td>${dpRowButtons(it)}</td><td>${dpCopyButtons(it)}</td></tr>`).join('');
+  dpRenderFocus();
+}
+function dpRenderFocus(){
+  if(!dpItems.length){dpEl('dpFocusPos').textContent='—';dpEl('dpFocusTitle').textContent='—';dpEl('dpFocusBody').textContent='—';dpEl('dpFocusCopy').innerHTML='';return;}
+  if(dpFocusIdx>=dpItems.length)dpFocusIdx=0; if(dpFocusIdx<0)dpFocusIdx=dpItems.length-1;
+  const it=dpItems[dpFocusIdx];
+  dpEl('dpFocusPos').textContent=`第 ${dpFocusIdx+1} / ${dpItems.length} 只（单只专注模式，一次只处理一只）`;
+  dpEl('dpFocusTitle').textContent=`${it.name||it.code}（${it.code}）· ${it.side} · ${it.suggested_qty}股`;
+  dpEl('dpFocusBody').innerHTML=`市场：${it.market||'—'}；参考价：${it.reference_price_cents?(it.reference_price_cents/100).toFixed(2):'—'}；当前状态：<b>${DP_LABEL[it.status]||it.status}</b>`+(it.note?`<br><span class="small muted">${it.note}</span>`:'');
+  dpEl('dpFocusCopy').innerHTML=dpCopyButtons(it);
+  dpEl('dpFocusConfirmBtn').onclick=()=>{if(it.status==='CONFIRMED')dpRevertItem(it.order_item_id);else dpClick(it.order_item_id,'CONFIRMED');};
+  const armed=(dpConfirmId===it.order_item_id);
+  dpEl('dpFocusConfirmBtn').textContent=armed?'确认成交（回车）':(it.status==='CONFIRMED'?'撤销确认':'确认成交');
+  dpEl('dpFocusConfirmBtn').disabled=((it.suggested_qty||0)<=0);
+}
+function dpClick(id,st){
+  if(dpBusy)return; const it=dpItemById(id); if(!it)return;
+  if(it.status===st)return;
+  if(st==='CONFIRMED'){
+    if((it.suggested_qty||0)<=0){dpNotice('该行建议股数为 0，不能确认成交，请改为“已跳过”或“待复核”。',true);return;}
+    if(!it.reference_price_cents){dpNotice('缺少参考价，无法确认成交金额。',true);return;}
+    dpConfirmId=id; dpRender(); return;
+  }
+  return dpSetState(id,st);
+}
+function dpCancelConfirm(){dpConfirmId=null;dpNotice('已取消确认。');dpRender();}
+async function dpRevertItem(id){
+  if(dpBusy)return; const it=dpItemById(id); if(!it||it.status!=='CONFIRMED')return;
+  const t=window.prompt(`撤销第 #${id} 行「${it.name||it.code}」的已确认成交？\n会删除该行联动写入的成交与现金事件，行状态回到「待下单」，并写审计日志。\n请输入「撤销确认」四字继续：`,'');
+  if(t===null)return;
+  dpBusy=true; dpRender();
+  try{
+    const r=await dpApi('POST','/api/ledger/order-items/'+id+'/revert',{confirm_text:t||''});
+    if(!r.ok)dpNotice('撤销失败：'+((r.body||{}).error||('HTTP '+r.status)),true);
+    else dpNotice('已撤销该行确认成交（成交 '+(r.body.transactions_deleted||0)+' 条、现金事件 '+(r.body.cash_events_deleted||0)+' 条已移除，审计已记）。');
+  }catch(e){dpNotice('撤销异常：'+e.message,true);}
+  finally{dpBusy=false;await dpLoadProgress();}
+}
+async function dpSetState(id,st){
+  if(dpBusy)return; dpBusy=true; dpRender();
+  try{
+    const r=await dpApi('POST','/api/ledger/order-items/'+id+'/state',{status:st});
+    if(!r.ok)dpNotice('状态更新失败：'+((r.body||{}).error||('HTTP '+r.status)),true);
+    else dpNotice('已更新为“'+(DP_LABEL[st]||st)+'”。');
+  }catch(e){dpNotice('状态更新异常：'+e.message,true);}
+  finally{dpBusy=false;await dpLoadProgress();}
+}
+async function dpConfirmItem(id){
+  if(dpBusy)return; const it=dpItemById(id); if(!it)return;
+  if((it.suggested_qty||0)<=0){dpNotice('该行建议股数为 0，不能确认成交，请改为“已跳过”或“待复核”。',true);return;}
+  if(!it.reference_price_cents){dpNotice('缺少参考价，无法确认成交金额。',true);return;}
+  dpConfirmId=null; dpBusy=true; dpRender();
+  try{
+    const cyc=(dpGate&&dpGate.batch)?dpGate.batch.cycle_id:null;
+    const r=await dpApi('POST','/api/ledger/transactions',{cycle_id:cyc,batch_id:it.batch_id,order_item_id:it.order_item_id,code:it.code,name:it.name||it.code,side:it.side,qty:it.suggested_qty,price_cents:it.reference_price_cents,confirmed:true,idempotency_key:'order-item:'+it.order_item_id});
+    if(!r.ok)dpNotice('确认失败：'+((r.body||{}).error||('HTTP '+r.status)),true);
+    else dpNotice('已确认成交并写入交易账本'+(r.body.idempotent_replay?'（重复点击已被幂等防护）':'')+'。');
+  }catch(e){dpNotice('确认异常：'+e.message,true);}
+  finally{dpBusy=false;await dpLoadProgress();}
+}
+async function dpLoadCycles(){
+  const r=await dpApi('GET','/api/ledger/cycles'); const cycles=(r.body||{}).cycles||[];
+  const sel=dpEl('dpCycleSelect'); const prev=dpCycleId;
+  sel.innerHTML=cycles.map(c=>`<option value="${c.cycle_id}">#${c.cycle_id} ${dpEsc(c.name||'')}（${c.status}）</option>`).join('');
+  const open=cycles.filter(c=>c.status==='OPEN');
+  if(prev&&cycles.some(c=>c.cycle_id===prev))dpCycleId=prev;
+  else dpCycleId=open.length?open[open.length-1].cycle_id:(cycles.length?cycles[cycles.length-1].cycle_id:null);
+  if(dpCycleId)sel.value=String(dpCycleId);
+}
+async function dpLoadBatches(){
+  if(!dpCycleId){dpBatchId=null;dpItems=[];dpGate=null;dpRender();return;}
+  const r=await dpApi('GET','/api/ledger/batches?cycle_id='+dpCycleId);
+  const bs=(r.body||{}).batches||[]; const sel=dpEl('dpBatchSelect');
+  sel.innerHTML=bs.map(b=>`<option value="${b.batch_id}">#${b.batch_id} ${DP_KIND_LABEL[b.kind]||b.kind} rev${b.revision} ${b.status}</option>`).join('')||'<option value="">（该周期暂无批次）</option>';
+  if(!bs.length){dpBatchId=null;dpItems=[];dpGate=null;dpRender();return;}
+  if(dpBatchId&&bs.some(b=>b.batch_id===dpBatchId)){sel.value=String(dpBatchId);}
+  else{
+    dpBatchId=bs[bs.length-1].batch_id;
+    for(let i=bs.length-1;i>=0;i--){
+      const p=await dpApi('GET','/api/ledger/batches/'+bs[i].batch_id+'/progress');
+      if(p.ok&&p.body.gate!=='done'){dpBatchId=bs[i].batch_id;break;}
+    }
+    sel.value=String(dpBatchId);
+  }
+  await dpLoadProgress();
+}
+async function dpLoadProgress(){
+  if(!dpBatchId){dpItems=[];dpGate=null;dpRender();return;}
+  const r=await dpApi('GET','/api/ledger/batches/'+dpBatchId+'/progress');
+  if(!r.ok){dpNotice('进度读取失败：'+((r.body||{}).error||('HTTP '+r.status)),true);dpItems=[];dpGate=null;dpRender();return;}
+  dpGate=r.body; dpItems=r.body.order_items||[]; dpFocusIdx=0; dpRender();
+}
+async function dpFreezeFromCalc(){
+  if(!backendOK){dpNotice('请通过 启动工具.command/.bat 启动本地服务后再新建批次。',true);return;}
+  if(!dpCycleId){dpNotice('请先“新建周期”或选择一个投资周期。',true);return;}
+  if(!holdings.length){dpNotice('V1.2 尚未载入成分权重，无法新建批次。',true);return;}
+  const kind=dpEl('dpKindSelect').value;
+  const capUse=(kind==='INITIAL'||kind==='ADD');
+  const cap=capUse?Math.round((+dpEl('dpCapital').value||0)*100):0;
+  if(kind==='INITIAL'&&cap<=0){dpNotice('首次建仓请填写新增资金（元）。',true);return;}
+  const weights=holdings.map(h=>({code:h.code,name:h.name,market:h.market,weight:h.weight}));
+  const qs=[],missing=[];
+  holdings.forEach(h=>{if(isManual(h.code)){missing.push(h.code+'（手动覆盖仅用于本页测算，不进账本定价）');return}const p=quotes[h.code];if(p>0){const m=quoteMeta[h.code]||{};qs.push({code:h.code,price_cents:Math.round(p*100),source:m.source||'页面行情',fetched_at:m.market_time||m.fetched_at||''})}else missing.push(h.code)});
+  if(missing.length){dpNotice('缺少行情：'+missing.join(',')+'（先“刷新当前行情”再新建）。',true);return;}
+  const body={cycle_id:dpCycleId,kind:kind,capital_cents:cap,weight_version:(INDEX_DATA[currentCode]||{}).snapshot||'',weight_date:snapshotDate||'',quote_source:(quoteMeta[holdings[0].code]||{}).source||'页面行情',quote_fetched_at:new Date().toISOString(),weights:weights,quotes:qs};
+  dpBusy=true; dpRender();
+  try{
+    const r=await dpApi('POST','/api/ledger/batches/freeze',body);
+    if(!r.ok){dpNotice('新建冻结批次失败：'+((r.body||{}).error||('HTTP '+r.status)),true);return;}
+    dpBatchId=r.body.batch.batch_id;
+    dpNotice('已冻结批次 #'+r.body.batch.batch_id+'（revision '+r.body.revision+'，'+r.body.order_items.length+' 项）。');
+    await dpLoadBatches();
+  }catch(e){dpNotice('新建异常：'+e.message,true);}
+  finally{dpBusy=false;dpRender();}
+}
+async function dpComplete(){
+  if(!dpBatchId)return;
+  const r=await dpApi('GET','/api/ledger/batches/'+dpBatchId+'/progress');
+  if(!r.ok||r.body.gate!=='done'){dpNotice('完成门禁未通过，不能完成批次。',true);await dpLoadProgress();return;}
+  const fmt=s=>{const arr=dpItems.filter(i=>i.status===s).map(i=>`${i.code} ${i.name||''} ${i.side} ${i.suggested_qty}股`);return arr.length?arr.join('；'):'无'};
+  const w=dpEl('dpDoneWrap'); w.style.display='block'; w.className='note';
+  w.innerHTML=`批次 #${dpBatchId} 已完成（服务端门禁 <b>done</b>）。<br>已确认成交：${fmt('CONFIRMED')}<br>已跳过：${fmt('SKIPPED')}`;
+}
+async function dpNewCycle(){
+  const name=window.prompt('新投资周期名称','投资周期 '+new Date().toLocaleDateString('zh-CN'));
+  if(name===null)return;
+  const r=await dpApi('POST','/api/ledger/cycles',{name:name});
+  if(!r.ok){dpNotice('新建周期失败：'+((r.body||{}).error||('HTTP '+r.status)),true);return;}
+  dpCycleId=r.body.cycle.cycle_id; await dpLoadCycles(); await dpLoadBatches();
+}
+async function dpDeleteBatch(){
+  if(!dpBatchId){dpNotice('请先在下单批次里选择要删除的批次。',true);return;}
+  const b=((dpGate||{}).batch)||{};
+  const cnt=((dpGate||{}).counts)||{};
+  const confirmed=Math.max(cnt.CONFIRMED||0,((dpGate||{}).confirmed_transactions)||0);
+  let confirmText='';
+  const head=`删除批次 #${dpBatchId}（${DP_KIND_LABEL[b.kind]||b.kind||''} rev${b.revision||'-'}）？会整批移除全部下单行、已确认成交与对应现金事件，并写审计日志。`;
+  if(confirmed>0){
+    confirmText=window.prompt(head+'\n该批次含 '+confirmed+' 条「已确认成交」，删除后不可恢复。\n请输入「确认删除」四字继续：','');
+    if(confirmText===null)return;
+  }else{
+    if(!window.confirm(head+'\n该批次无已确认成交，确认删除？'))return;
+  }
+  dpBusy=true; dpNotice('正在删除批次 #'+dpBatchId+'…');
+  try{
+    const r=await dpApi('POST','/api/ledger/batches/'+dpBatchId+'/delete',{confirm_text:confirmText||''});
+    if(!r.ok){dpNotice('删除失败：'+((r.body||{}).error||('HTTP '+r.status)),true);return;}
+    const d=r.body||{};
+    dpNotice('已删除批次 #'+(d.batch_id||dpBatchId)+'：下单行 '+(d.order_items_deleted||0)+' 条、成交 '+(d.transactions_deleted||0)+' 条、现金事件 '+(d.cash_events_deleted||0)+' 条（审计 audit_id '+((d.audit||{}).audit_id||'-')+'）。');
+    dpBatchId=null; await dpLoadBatches();
+  }catch(e){dpNotice('删除异常：'+e.message,true);}
+  finally{dpBusy=false;}
+}
+async function dpInit(){
+  try{
+    const r=await dpApi('GET','/api/ledger/status');
+    if(!r.ok){dpNotice('本地账本服务不可用：下单页需要启动工具启动本地服务后使用。',true);return;}
+    dpNotice('本地服务正常，已从服务端恢复批次进度。');
+    await dpLoadCycles(); await dpLoadBatches();
+  }catch(e){dpNotice('下单页初始化失败：'+e.message+'（请通过启动工具启动本地服务）',true);}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  dpEl('dpNewCycleBtn').onclick=dpNewCycle;
+  dpEl('dpReloadBtn').onclick=()=>dpLoadProgress();
+  dpEl('dpFreezeBtn').onclick=dpFreezeFromCalc;
+  dpEl('dpCompleteBtn').onclick=dpComplete;
+  dpEl('dpCycleSelect').onchange=e=>{dpCycleId=+e.target.value||null;dpBatchId=null;dpLoadBatches();};
+  dpEl('dpBatchSelect').onchange=e=>{dpBatchId=+e.target.value||null;dpLoadProgress();};
+  dpEl('dpPrevBtn').onclick=()=>{dpFocusIdx--;dpRenderFocus();};
+  dpEl('dpNextBtn').onclick=()=>{dpFocusIdx++;dpRenderFocus();};
+  dpEl('dpFocusConfirmBtn').onclick=()=>{if(dpItems[dpFocusIdx])dpClick(dpItems[dpFocusIdx].order_item_id,'CONFIRMED');};
+  dpEl('dpFocusSkipBtn').onclick=()=>{if(dpItems[dpFocusIdx])dpSetState(dpItems[dpFocusIdx].order_item_id,'SKIPPED');};
+  dpEl('dpFocusReviewBtn').onclick=()=>{if(dpItems[dpFocusIdx])dpSetState(dpItems[dpFocusIdx].order_item_id,'REVIEW');};
+  document.querySelectorAll('input[name=dpView]').forEach(x=>x.onchange=()=>{
+    dpView=x.value;document.querySelectorAll('input[name=dpView]').forEach(y=>y.parentElement.classList.toggle('active',y.checked));dpRender();
+  });
+  if(dpEl('dpAdvToggleBtn'))dpEl('dpAdvToggleBtn').onclick=()=>{const a=dpEl('dpAdvArea');const show=a.style.display==='none';a.style.display=show?'block':'none';dpEl('dpAdvToggleBtn').textContent=show?'隐藏高级异常处理':'显示高级异常处理'};
+  if(dpEl('dpDeleteBatchBtn'))dpEl('dpDeleteBatchBtn').onclick=dpDeleteBatch;
+  document.addEventListener('keydown',e=>{
+    if(dpConfirmId==null)return;
+    const t=e.target||{}; if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;
+    if(e.key==='Enter'){e.preventDefault();dpConfirmItem(dpConfirmId);}
+    else if(e.key==='Escape'){e.preventDefault();dpCancelConfirm();}
+  });
+  dpInit();
+});
+</script>
+<script>
+/* ===================== D4 估值回撤看板 + 行情三路 UI（增量脚本，不改 V1.2/D1-D3 既有区块） ===================== */
+document.addEventListener('DOMContentLoaded',()=>{
+  const dEl=id=>document.getElementById(id);
+  if(dEl('manualToggleBtn'))dEl('manualToggleBtn').onclick=()=>{const a=dEl('manualOverrideArea');const show=a.style.display==='none';a.style.display=show?'block':'none';dEl('manualToggleBtn').textContent=show?'隐藏高级异常处理':'显示高级异常处理'};
+  if(dEl('manualClearBtn'))dEl('manualClearBtn').onclick=()=>{manualOverride={};saveManualOverride();renderManualRows();calc();renderRows();updateQuoteStatus()};
+  renderManualRows();
+  loadDrawdownBoard();
+});
+</script>
+<script>
+/* ===================== D5 持仓与历史（只读；调 cycle_summary，不改 V1.2/D1-D4 既有区块） ===================== */
+document.addEventListener('DOMContentLoaded',()=>{
+  const hpEl=id=>document.getElementById(id);
+  const HP={cycleId:null,summary:null};
+  function hpMoney(cents){return Number.isFinite(cents)?('¥'+nf.format(Math.round(cents/100))):'—'}
+  function hpSetHint(msg,bad){const e=hpEl('hpHint');if(!e)return;e.className='small '+(bad?'bad':'muted');e.textContent=msg||''}
+  async function hpApi(method,path){
+    const r=await fetch(path,{method:method,headers:{'Content-Type':'application/json'},cache:'no-store'});
+    let j={};try{j=await r.json()}catch(e){}
+    return {status:r.status,ok:r.ok,body:j||{}};
+  }
+  function hpConstituentSet(){
+    const arr=(typeof holdings!=='undefined'&&Array.isArray(holdings))?holdings:[];
+    const s={};arr.forEach(h=>{if(h&&h.code)s[String(h.code)]=true});
+    return s;
+  }
+  function hpBd(v){return (v==null?'—':v)}
+  function hpLoadCash(){
+    if(HP.cycleId==null)return;
+    hpApi('GET','/api/ledger/cash?cycle_id='+HP.cycleId).then(r=>{
+      const ev=((r.body||{}).cash_events)||[];const tb=hpEl('hpCashRows');if(!tb)return;
+      tb.innerHTML=ev.length?ev.map(e=>'<tr><td>'+hpBd(e.cash_event_id)+'</td><td class="small">'+vEsc(e.occurred_at||'')+'</td><td>'+vEsc(e.event_type||'')+'</td><td>'+hpMoney(e.amount_cents)+'</td><td>'+hpBd(e.transaction_id)+'</td><td class="small">'+vEsc(e.note||'')+'</td></tr>').join(''):'<tr><td colspan="6" class="muted">暂无现金事件</td></tr>';
+    }).catch(()=>{});
+  }
+  function hpRender(){
+    const rows=hpEl('hpRows');if(!rows)return;
+    const s=HP.summary;
+    if(!s){rows.innerHTML='';hpEl('hpCashRows').innerHTML='';return}
+    const cyc=s.cycle||{};
+    HP.cycleId=cyc.cycle_id||HP.cycleId;
+    hpEl('hpCycleStatus').textContent=(cyc.status==='CLOSED'?'CLOSED（已关闭）':'OPEN（进行中）');
+    hpEl('hpCashBalance').textContent=hpMoney(s.cash_balance_cents);
+    hpEl('hpBatchCount').textContent=hpBd(s.batch_count);
+    hpEl('hpTxCount').textContent=hpBd(s.transaction_count);
+    hpEl('hpRebuildSource').textContent=s.holdings_rebuild_source||'v_holdings(confirmed transactions)';
+    const cs=hpConstituentSet(),known=Object.keys(cs).length>0,hs=s.holdings||[];
+    if(!hs.length){rows.innerHTML='<tr><td colspan="8" class="muted">当前无持仓（全部已清仓或尚未确认成交）</td></tr>'}
+    else{rows.innerHTML=hs.map(h=>{const code=String(h.code||'');const stale=known&&!cs[code];
+      return '<tr class="'+(stale?'stale-row':'')+'"><td>'+vEsc(h.market||'')+'</td><td>'+vEsc(code)+'</td><td>'+vEsc(h.name||code)+'</td><td>'+hpBd(h.qty)+'</td><td>'+hpMoney(h.avg_cost_cents)+'</td><td>'+hpMoney(h.net_cost_cents)+'</td><td>'+(stale?'<span class="badge">STALE_CONSTITUENT</span>':'IN_INDEX')+'</td><td class="small">confirmed 成交重建（v_holdings）</td></tr>';
+    }).join('')}
+    if(known&&hs.some(h=>!cs[String(h.code)])){hpSetHint('含非当前成分持仓（STALE_CONSTITUENT）：保留显示、不分配新 BUY、清仓照常卖出',false)}
+    hpLoadCash();
+  }
+  async function hpLoadSummary(cid){
+    const r=await hpApi('GET','/api/ledger/cycles/'+cid+'/summary');
+    if(!r.ok){hpSetHint('读取周期 summary 失败：'+(r.body.error||r.status),true);return}
+    HP.summary=r.body;hpSetHint('已加载周期 #'+cid+' 的持仓与历史（只读）',false);hpRender();
+  }
+  async function hpLoadCycles(){
+    try{
+      const r=await hpApi('GET','/api/ledger/cycles');const cycles=((r.body||{}).cycles)||[];
+      const sel=hpEl('hpCycleSelect');if(!sel)return;
+      if(!cycles.length){sel.innerHTML='<option value="">（暂无周期）</option>';hpSetHint('账本尚无投资周期',true);return}
+      sel.innerHTML=cycles.map(c=>'<option value="'+c.cycle_id+'">#'+c.cycle_id+' '+vEsc(c.name||'')+' ['+vEsc(c.status||'')+']</option>').join('');
+      const pick=sel.value||String(cycles[cycles.length-1].cycle_id);sel.value=pick;
+      await hpLoadSummary(pick);
+    }catch(e){hpSetHint('账本服务不可用：'+e.message,true)}
+  }
+  if(hpEl('hpReloadBtn')){
+    hpEl('hpReloadBtn').onclick=()=>{const sel=hpEl('hpCycleSelect');if(sel&&sel.value)hpLoadSummary(sel.value)};
+    hpEl('hpCycleSelect').onchange=()=>{const sel=hpEl('hpCycleSelect');if(sel.value)hpLoadSummary(sel.value)};
+    hpLoadCycles();
+  }
+});
+</script></body></html>

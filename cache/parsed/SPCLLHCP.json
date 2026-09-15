@@ -1,0 +1,359 @@
+{
+  "code": "SPCLLHCP",
+  "date": "2026-06-30",
+  "source": "515450中报完整指数投资持仓代理（非标普每日官方权重）",
+  "saved_at": "2026-09-15T11:11:00+08:00",
+  "holdings": [
+    {
+      "code": "000651",
+      "name": "格力电器",
+      "market": "SZ",
+      "weight": 4.08,
+      "star": false
+    },
+    {
+      "code": "600642",
+      "name": "申能股份",
+      "market": "SH",
+      "weight": 3.65,
+      "star": false
+    },
+    {
+      "code": "600023",
+      "name": "浙能电力",
+      "market": "SH",
+      "weight": 3.64,
+      "star": false
+    },
+    {
+      "code": "600177",
+      "name": "雅戈尔",
+      "market": "SH",
+      "weight": 3.61,
+      "star": false
+    },
+    {
+      "code": "601088",
+      "name": "中国神华",
+      "market": "SH",
+      "weight": 3.06,
+      "star": false
+    },
+    {
+      "code": "001286",
+      "name": "陕西能源",
+      "market": "SZ",
+      "weight": 2.75,
+      "star": false
+    },
+    {
+      "code": "600350",
+      "name": "山东高速",
+      "market": "SH",
+      "weight": 2.73,
+      "star": false
+    },
+    {
+      "code": "000895",
+      "name": "双汇发展",
+      "market": "SZ",
+      "weight": 2.71,
+      "star": false
+    },
+    {
+      "code": "600352",
+      "name": "浙江龙盛",
+      "market": "SH",
+      "weight": 2.7,
+      "star": false
+    },
+    {
+      "code": "601668",
+      "name": "中国建筑",
+      "market": "SH",
+      "weight": 2.62,
+      "star": false
+    },
+    {
+      "code": "000333",
+      "name": "美的集团",
+      "market": "SZ",
+      "weight": 2.57,
+      "star": false
+    },
+    {
+      "code": "002032",
+      "name": "苏泊尔",
+      "market": "SZ",
+      "weight": 2.46,
+      "star": false
+    },
+    {
+      "code": "600941",
+      "name": "中国移动",
+      "market": "SH",
+      "weight": 2.42,
+      "star": false
+    },
+    {
+      "code": "601298",
+      "name": "青岛港",
+      "market": "SH",
+      "weight": 2.37,
+      "star": false
+    },
+    {
+      "code": "601838",
+      "name": "成都银行",
+      "market": "SH",
+      "weight": 2.36,
+      "star": false
+    },
+    {
+      "code": "001965",
+      "name": "招商公路",
+      "market": "SZ",
+      "weight": 2.27,
+      "star": false
+    },
+    {
+      "code": "601006",
+      "name": "大秦铁路",
+      "market": "SH",
+      "weight": 2.26,
+      "star": false
+    },
+    {
+      "code": "600015",
+      "name": "华夏银行",
+      "market": "SH",
+      "weight": 2.22,
+      "star": false
+    },
+    {
+      "code": "000858",
+      "name": "五粮液",
+      "market": "SZ",
+      "weight": 2.2,
+      "star": false
+    },
+    {
+      "code": "600887",
+      "name": "伊利股份",
+      "market": "SH",
+      "weight": 2.19,
+      "star": false
+    },
+    {
+      "code": "601728",
+      "name": "中国电信",
+      "market": "SH",
+      "weight": 2.11,
+      "star": false
+    },
+    {
+      "code": "600919",
+      "name": "江苏银行",
+      "market": "SH",
+      "weight": 2.07,
+      "star": false
+    },
+    {
+      "code": "601169",
+      "name": "北京银行",
+      "market": "SH",
+      "weight": 2.07,
+      "star": false
+    },
+    {
+      "code": "600900",
+      "name": "长江电力",
+      "market": "SH",
+      "weight": 2.01,
+      "star": false
+    },
+    {
+      "code": "600377",
+      "name": "宁沪高速",
+      "market": "SH",
+      "weight": 1.89,
+      "star": false
+    },
+    {
+      "code": "600519",
+      "name": "贵州茅台",
+      "market": "SH",
+      "weight": 1.86,
+      "star": false
+    },
+    {
+      "code": "601328",
+      "name": "交通银行",
+      "market": "SH",
+      "weight": 1.86,
+      "star": false
+    },
+    {
+      "code": "000001",
+      "name": "平安银行",
+      "market": "SZ",
+      "weight": 1.8,
+      "star": false
+    },
+    {
+      "code": "601939",
+      "name": "建设银行",
+      "market": "SH",
+      "weight": 1.79,
+      "star": false
+    },
+    {
+      "code": "600873",
+      "name": "梅花生物",
+      "market": "SH",
+      "weight": 1.78,
+      "star": false
+    },
+    {
+      "code": "601818",
+      "name": "光大银行",
+      "market": "SH",
+      "weight": 1.77,
+      "star": false
+    },
+    {
+      "code": "601229",
+      "name": "上海银行",
+      "market": "SH",
+      "weight": 1.74,
+      "star": false
+    },
+    {
+      "code": "601658",
+      "name": "邮储银行",
+      "market": "SH",
+      "weight": 1.74,
+      "star": false
+    },
+    {
+      "code": "601916",
+      "name": "浙商银行",
+      "market": "SH",
+      "weight": 1.74,
+      "star": false
+    },
+    {
+      "code": "601988",
+      "name": "中国银行",
+      "market": "SH",
+      "weight": 1.72,
+      "star": false
+    },
+    {
+      "code": "600016",
+      "name": "民生银行",
+      "market": "SH",
+      "weight": 1.7,
+      "star": false
+    },
+    {
+      "code": "600028",
+      "name": "中国石化",
+      "market": "SH",
+      "weight": 1.62,
+      "star": false
+    },
+    {
+      "code": "601009",
+      "name": "南京银行",
+      "market": "SH",
+      "weight": 1.59,
+      "star": false
+    },
+    {
+      "code": "601166",
+      "name": "兴业银行",
+      "market": "SH",
+      "weight": 1.58,
+      "star": false
+    },
+    {
+      "code": "601398",
+      "name": "工商银行",
+      "market": "SH",
+      "weight": 1.39,
+      "star": false
+    },
+    {
+      "code": "600886",
+      "name": "国投电力",
+      "market": "SH",
+      "weight": 1.39,
+      "star": false
+    },
+    {
+      "code": "600019",
+      "name": "宝钢股份",
+      "market": "SH",
+      "weight": 1.31,
+      "star": false
+    },
+    {
+      "code": "000423",
+      "name": "东阿阿胶",
+      "market": "SZ",
+      "weight": 1.3,
+      "star": false
+    },
+    {
+      "code": "601186",
+      "name": "中国铁建",
+      "market": "SH",
+      "weight": 1.05,
+      "star": false
+    },
+    {
+      "code": "600600",
+      "name": "青岛啤酒",
+      "market": "SH",
+      "weight": 1.04,
+      "star": false
+    },
+    {
+      "code": "601288",
+      "name": "农业银行",
+      "market": "SH",
+      "weight": 0.99,
+      "star": false
+    },
+    {
+      "code": "601000",
+      "name": "唐山港",
+      "market": "SH",
+      "weight": 0.78,
+      "star": false
+    },
+    {
+      "code": "603195",
+      "name": "公牛集团",
+      "market": "SH",
+      "weight": 0.61,
+      "star": false
+    },
+    {
+      "code": "600132",
+      "name": "重庆啤酒",
+      "market": "SH",
+      "weight": 0.47,
+      "star": false
+    },
+    {
+      "code": "603658",
+      "name": "安图生物",
+      "market": "SH",
+      "weight": 0.33,
+      "star": false
+    }
+  ],
+  "weight_sum": 99.97
+}

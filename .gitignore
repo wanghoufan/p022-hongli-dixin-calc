@@ -1,0 +1,18 @@
+# 数据库运行文件一律不进 Git（结构 Migration / schema.sql 必须进 Git）
+dev.db
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+var/
+
+# 临时/系统文件
+__pycache__/
+*.pyc
+.DS_Store
+*.tmp
+
+# 未经授权不得纳入的正式运行/备份目录（防误提交）
+DockerData/
+DockerBackups/
