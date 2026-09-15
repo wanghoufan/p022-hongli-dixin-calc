@@ -83,3 +83,14 @@
 ---
 
 *ACCEPTANCE_D6 由 ORCA builder 落盘，待 code-reviewer/qa/supervisor 收链复核。*
+
+## 增补｜D7-D10（2026-09-16，用户验收返工＋Change B，不改 D6 结论）
+
+| 阶段 | 内容 | 烟雾 |
+|---|---|---:|
+| D7 | 估值紧凑两表＋宽基公开估算＋行内确认/回车＋复制 toast＋删除测试批次（migration 0002/schema v2） | 242/242 |
+| D8 | 单行撤销已确认成交（migration 0003/schema v3＋`ledger_reverts`）＋标签 nowrap | 262/262 |
+| D9 | 回撤近似数据抓取接线（`fetch_drawdown.py`＋`drawdown.json` 9/9＋脚注来源行） | 278/278 |
+| D10 | 宽基风险溢价 PE 口径反推（36.2/22.3/30.2，标估算） | 282/282 |
+
+- 每阶段 reviewer 过（P0=0）、QA 通道环境 FAIL（bug 0）、supervisor 独立重跑补位；rework 0，无升级。证据见 `docs/review/CODE_REVIEW_D7..D10.md`、`docs/qa/BUGS_D7..D10.md`、双账本。

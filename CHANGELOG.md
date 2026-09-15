@@ -10,8 +10,12 @@
 - **D4｜估值回撤看板 + 行情三路 UI**（P0#2#3#4）：三宽基 + 六红利统一字段顺序与三层口径（课程/官方/第三方）各自标注、不混口径；回撤固定 `currentClose/highestClose-1` 且必须同指数双源核验（inner join、并集缺失率 ≤0.5%、相对误差 ≤0.10%、候选最高 20 日不缺日、负例身份校验），核验不通过或无授权序列只显示「暂无数据」；行情三路状态契约（`source/status/dataDate/fetchedAt/ageSeconds/attempts/errorCode/cacheAgeSeconds/stale`，五态枚举、3s timeout、2 次退避、72h/3 交易日陈旧）；普通价格只读，手动覆盖默认隐藏并标 `MANUAL_OVERRIDE`、不进账本定价；修复 D4 自身 P1×2（恢复需连续 2 次成功、双源抽样补 seeded 随机 20）。smoke 180/180。
 - **D5｜持仓与历史页 + 非当前成分**（P0#10）：只读持仓页从 confirmed 成交重建（`v_holdings`）、策略现金余额/流水、批次计数；非当前成分持仓以 `STALE_CONSTITUENT` 标记（不分配新 BUY、保留显示、EXIT 照常全仓 SELL）；修复 D4 遗留 P1×2（源健康度滚动窗口与连续 2 次恢复、双源抽样确定性）。smoke 209/209。
 - **D6｜文档对齐 + 验收报告 + 最终回归**（P0#11#12）：README 增 V1.3 节，CHANGELOG/更新日历与数据口径/智能体更新提示词对齐，新增 `docs/qa/ACCEPTANCE_D6.md` 验收报告；全量回归 `scripts/ledger_smoke_test.py` **209/209 EXIT=0**，全程仅用临时开发库，未触碰正式库/生产目录。
+- **D7｜UI 返工五项**（Change B，用户验收反馈）：估值区拆宽基/红利两张表＋紧凑行高；宽基 PE/PB/股息率分位按证据门 B 例外落公开估算（百分位/股叉叉，逐格标来源＋估算）；行内确认＋回车/Esc（删 `window.confirm`）；复制就近 toast；删除测试批次（含 CONFIRMED 需输“确认删除”四字＋审计，CLOSED 拒绝）。smoke 242/242。
+- **D8｜单行撤销已确认成交**（用户明确要求）：CONFIRMED 行“撤销”按钮＋输入“撤销确认”四字，删联动成交/现金事件、行回 PENDING、CLOSED 拒绝＋审计（migration 0003＋schema v3＋`ledger_reverts`）；标签 `.vtag` 加 nowrap 修劈半。smoke 262/262。
+- **D9｜回撤近似数据上架**（用户拍板近似＋交叉验证）：`scripts/fetch_drawdown.py`（腾讯 fqkline bfq / 东方财富 push2his fqt=0 不复权收盘近 10 年 `MAX(close)`，失败用参考站 2026-08-07 快照兜底并标注）→ `cache/valuation/drawdown.json`（9/9 有数＋crossChecks）→ `/api/drawdown`＋页面脚注来源行。smoke 278/278。
+- **D10｜宽基风险溢价 PE 口径反推**（参考站同款公式 `100−PE分位`：36.2/22.3/30.2，标估算；股息率口径仍 NA）。smoke 282/282。
 
-> 说明：V1.3 全部增量为本地开发/测试交付；QA 通道因沙箱禁绑端口/Orca Runtime 不可达连续预检 FAIL（D1-D5，产品 bug 0 条），真机/浏览器复验待用户；未授权正式生产部署。详见 `docs/qa/ACCEPTANCE_D6.md`。
+> 说明：V1.3 全部增量为本地开发/测试交付；QA 通道因沙箱禁绑端口/Orca Runtime 不可达连续预检 FAIL（D1-D10，产品 bug 0 条），supervisor 逐阶段独立重跑补位（79→121→146→180→209→242→262→278→282 全绿）；真机/浏览器复验待用户；未授权正式生产部署。详见 `docs/qa/ACCEPTANCE_D6.md`（含 D7-D10 增补）。
 
 ## V1.2｜2026-09-15
 
