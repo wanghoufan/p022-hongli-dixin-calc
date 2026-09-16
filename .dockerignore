@@ -4,6 +4,8 @@ dev.db*
 __pycache__/
 *.pyc
 cache/
+!cache/valuation/
+!cache/valuation/**
 docs/
 .git/
 .env*.local
