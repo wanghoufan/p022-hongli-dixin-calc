@@ -17,7 +17,7 @@
 - 端口/路径：宿主端口、公开 URL、数据/备份路径均有变量接口；数据与备份目录均通过必填变量绑定，未设置 `/tmp` 默认路径。
 - `dev.db`：工作区存在 `dev.db`、`dev.db-wal`、`dev.db-shm`，均未被 Git 跟踪；`.gitignore` 与 `.dockerignore` 均有对应排除规则。
 - Python 语法：`server.py` 及 `db/*.py` 全部通过 `ast.parse` 检查。
-- Docker 构建：`docker build -t dividend-portfolio:v1.3.0 .` 通：镜像 `dividend-portfolio:v1.3.0` 构建成功。
+- Docker 构建：`docker build -t dividend-portfolio:v1.3.0 .` 通：镜像 `dividend-portfolio:v1.3.0` 构建成功（已推 e450665，HEAD 现为 6a12aae）。
 - 容器访问：容器端口 `8771` 返回 HTTP 200；本地端口 `8779` 默认访问返回 HTTP 200。
 - Git 排除：`.gitignore` 含 `.env*.local`，本地环境文件已排除。
 
