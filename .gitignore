@@ -16,3 +16,7 @@ __pycache__/
 # 未经授权不得纳入的正式运行/备份目录（防误提交）
 DockerData/
 DockerBackups/
+
+# 私密环境文件一律不进 Git（只提交 docker/env.template 占位模板）
+.env*.local
+docker/.env.local

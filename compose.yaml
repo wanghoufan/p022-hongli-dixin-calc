@@ -1,0 +1,28 @@
+name: ${COMPOSE_PROJECT_NAME:-dividend-portfolio}
+services:
+  app:
+    build: .
+    image: dividend-portfolio:${IMAGE_TAG:-latest}
+    ports:
+      - "${APP_PORT:-8771}:8000"
+    volumes:
+      # 宿主目录必须预先存在：无默认值，未设 APP_DATA_DIR 即报错，不静默创建。
+      - type: bind
+        source: ${APP_DATA_DIR:?APP_DATA_DIR must be set to a pre-existing host dir}
+        target: /data
+      - type: bind
+        source: ${APP_BACKUP_DIR:?APP_BACKUP_DIR must be set to a pre-existing host dir}
+        target: /backups
+        read_only: true
+    environment:
+      PROJECT_SLUG: ${PROJECT_SLUG:-dividend-portfolio}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:?PUBLIC_APP_URL must be set}
+      APP_BACKUP_DIR: ${APP_BACKUP_DIR:?APP_BACKUP_DIR must be set}
+      DIVIDEND_QUOTE_CACHE: /data/quotes.json
+      DIVIDEND_LEDGER_DB: /data/ledger.db
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

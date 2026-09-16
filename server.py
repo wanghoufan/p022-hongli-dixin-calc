@@ -517,7 +517,7 @@ def main():
     ap=argparse.ArgumentParser(); ap.add_argument("--port",type=int,default=8765); ap.add_argument("--no-open",action="store_true"); ap.add_argument("--prefetch-only",action="store_true"); ap.add_argument("--refresh",action="store_true"); ap.add_argument("--db",default=None,help="账本开发库路径（默认 ./dev.db 或环境变量 DIVIDEND_LEDGER_DB）"); args=ap.parse_args()
     if args.db: os.environ["DIVIDEND_LEDGER_DB"]=str(Path(args.db).expanduser())
     if args.prefetch_only: raise SystemExit(prefetch_cli(args.refresh or True))
-    srv=ThreadingHTTPServer(("127.0.0.1",args.port),Handler); url=f"http://127.0.0.1:{args.port}/"
+    srv=ThreadingHTTPServer((os.environ.get("BIND","127.0.0.1"),args.port),Handler); url=f"http://127.0.0.1:{args.port}/"
     print("\n红利打新底仓计算器 V1.2 正式长期版")
     if ledger_api is not None:
         try:
