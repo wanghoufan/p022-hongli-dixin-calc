@@ -16,7 +16,7 @@
 - 未闭环评审意见（code-reviewer/qa 留的还没改的）：无
 - docs 落盘清单：D1 账本骨架（79）→D2 生命周期（121）→D3 下单页（146）→D4 估值行情（180）→D5 持仓（209）→D6 文档验收→D7 UI 返工（242）→D8 撤销（262）→D9 回撤近似（278）→D10 rp 反推（282/282 全绿）；review×10（D1-D10 过 P0=0）、qa×10（D1-D10 环境 FAIL bug 0）、ACCEPTANCE_D6（含 D7-D10 增补）；CHANGELOG 补 D7-D10；DISPATCH-LOG 58 行、TASK-MODEL-LOG 32 行（双校验 exit=0）
 - 下一步（Next Single Action）：V1.3＋D7-D10 收工；仅剩用户浏览器复验一项（服务已在 8766 运行，开 http://127.0.0.1:8766/），QA 通道恢复后 TM 补跑留档
-- Git（2026-09-16 用户明确指令）：已建私有库 wanghoufan/dividend-portfolio-Mac 并 push 首版（分支 main，commit“V1.3＋D7-D10 全量交付”）；dev.db 未跟踪；win 端只 clone 不 push 回本库
+- Git（2026-09-16 用户明确指令）：私有库已改名 wanghoufan/hongli-dixin-calc（原 dividend-portfolio-Mac，旧地址自动跳转）；分支 main 已推到 42be4c4；dev.db 未跟踪；win 只读副本需重拉，不 push 回本库
 - 人要拍什么板（列出来问，不问不许开工）：无（常驻指令：持续推进不问；仅收尾真机/浏览器复验时再找人一次）
 - permission_request（可选：原文/决策/回执一句，首版可先记自然语言一句）：无
 - 收尾记一笔（neat-freak：文档对齐了没、临时文件清了没、未决列完没；neat 派完后 TM 补记，若已落盘则追加修订行）：neat-freak 2026-09-15 已收尾：①口径§4一句已按 CODE_REVIEW_D6 P2-1 改为三路顺序＋五态流转、与 README§5 对齐；②REVIEW/BUGS D1-D6 齐＋ACCEPTANCE_D6 在，HANDOFF 账本行数已订正 35/17→39/20；③项目内无 *.db、无 __pycache__、无 docs/tmp 残留（/tmp 未动）。业务代码未动。
