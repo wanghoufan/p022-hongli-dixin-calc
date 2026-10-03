@@ -20,3 +20,6 @@ DockerBackups/
 # 私密环境文件一律不进 Git（只提交 docker/env.template 占位模板）
 .env*.local
 docker/.env.local
+
+# ORCA 迁移备份（回滚用，勿入库）
+*.旧版-2026-09-29

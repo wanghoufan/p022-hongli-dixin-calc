@@ -1,6 +1,6 @@
 # Mac Mini 本地项目自托管 Docker 规范
 
-> 版本：V1.1  
+> 版本（本规范自身版本史，非治理版本号，治理版本以 Git 历史为准）：V1.1  
 > 日期：2026-09-02  
 > 状态：当前生效。适用于个人项目在 Mac Mini、阿里云、腾讯云、VPS 等 Docker 主机上的统一部署。  
 > 配套文件：[共享 Supabase 项目与独立 Schema 数据库规范](./supabase.md)。数据库结构、RLS、Migration 与恢复门禁以数据库规范为准。
