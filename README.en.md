@@ -127,10 +127,33 @@ Holdings that are no longer current constituents are kept visible and marked `ST
 ## Ledger dev database and isolation
 
 - The ledger defaults to the dev database `./dev.db`; the path can be overridden with `--db <path>` or the `DIVIDEND_LEDGER_DB` environment variable.
-- **Dev database and production database are isolated**: development/testing may only use temporary or dev databases and must never touch the production database or production directories. Formal Docker/SQLite directories, backups, and scheduling are **not authorized** in this version and are not created (Docker deployment requires separate authorization as its own project).
+- **Dev database and container database are isolated**: development/testing may only use temporary or dev databases such as `./dev.db` and must never touch production directories. Under Docker the ledger is fixed at `/data/ledger.db` inside the container (`DIVIDEND_LEDGER_DB`), which never mixes with the local dev database — see the next section.
 - `.db` / `.db-wal` / `.db-shm` / `var/` / `DockerData/` / `DockerBackups/` are excluded by `.gitignore`, so database runtime files never enter Git; the static server refuses to expose the `db/` directory and `.db` files — the browser can reach the ledger only through the API.
 - All demo data is fictional and can be cleared. For backup/restore use SQLite `.backup` or `VACUUM INTO`, and after restoring verify with `integrity_check` and `foreign_key_check`.
 - Full regression: `python3 scripts/ledger_smoke_test.py` (creates a dev database in the system temp directory and never touches the production database or directories), currently **282/282 EXIT=0**.
+
+## Docker deployment (optional, single-machine resident)
+
+The repo ships a four-piece set — `Dockerfile`, `compose.yaml`, `.dockerignore`, and `docker/env.template`. Inside the container the service listens on port 8000; the host port defaults to 8771 (verified returning HTTP 200).
+
+1. First prepare two **already-existing** host directories (a data directory and a backup directory; Compose never creates them silently).
+2. Copy the template and fill in real values (private values go only into `.env.local`, which never enters Git):
+
+```bash
+cp docker/env.template docker/.env.local
+# Fill PROJECT_SLUG / COMPOSE_PROJECT_NAME / APP_PORT / PUBLIC_APP_URL
+#     APP_DATA_DIR / APP_BACKUP_DIR / IMAGE_TAG
+```
+
+3. Build and start (the four-piece set shipped in D11; the container health check runs every 30s):
+
+```bash
+docker compose --env-file docker/.env.local up -d
+```
+
+4. Open `http://127.0.0.1:<APP_PORT>/` (default `8771`).
+
+The ledger inside the container is always written to `/data/ledger.db` and the quote cache to `/data/quotes.json`, both inside the data directory and fully isolated from the local `./dev.db`; the backup directory is mounted read-only at `/backups`.
 
 ## Formal maintenance
 

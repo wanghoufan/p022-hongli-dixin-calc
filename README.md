@@ -8,7 +8,7 @@
 
 只做计划、记录和核对，**不自动决定、不自动交易**，不接券商接口，不接 Supabase。目标运行环境是 Mac Mini 自托管、桌面浏览器操作。
 
-## 启动方式（Mac）
+## 快速开始（Mac）
 
 双击：`启动工具.command`
 
@@ -127,10 +127,33 @@ python3 server.py --prefetch-only --refresh
 ## 账本开发库与隔离
 
 - 账本默认使用开发库 `./dev.db`；数据库路径可用 `--db <path>` 或环境变量 `DIVIDEND_LEDGER_DB` 覆盖。
-- **开发库与正式库隔离**：开发/测试只允许使用临时或开发库，不得触碰正式库或生产目录；正式 Docker/SQLite 目录、备份和调度在本版**未授权**，不创建（Docker 部署另行立项授权）。
+- **开发库与容器库隔离**：开发/测试只允许使用临时或开发库 `./dev.db`，不得触碰生产目录；Docker 方式的账本固定在容器内 `/data/ledger.db`（`DIVIDEND_LEDGER_DB`），与本地开发库互不相通，见下节。
 - `.db` / `.db-wal` / `.db-shm` / `var/` / `DockerData/` / `DockerBackups/` 已被 `.gitignore` 排除，数据库运行文件不进 Git；静态服务拒绝暴露 `db/` 目录与 `.db` 文件，浏览器只能走 API 访问账本。
 - 演示数据均为虚构且可清除；备份/恢复请使用 SQLite `.backup` 或 `VACUUM INTO`，恢复后校验 `integrity_check` 与 `foreign_key_check`。
 - 全量回归：`python3 scripts/ledger_smoke_test.py`（在系统临时目录建开发库，全程不触碰正式库/生产目录），当前 **282/282 EXIT=0**。
+
+## Docker 部署（可选，单机常驻）
+
+仓库自带 `Dockerfile`、`compose.yaml`、`.dockerignore`、`docker/env.template` 四件套，构建后容器内服务监听 8000，宿主端口默认 8771（实测返回 200）。
+
+1. 先在宿主机准备两个**已存在**的目录（数据目录、备份目录；Compose 不会静默创建）。
+2. 复制模板并填写真实值（私密值只放 `.env.local`，不进 Git）：
+
+```bash
+cp docker/env.template docker/.env.local
+# 填 PROJECT_SLUG / COMPOSE_PROJECT_NAME / APP_PORT / PUBLIC_APP_URL
+#     APP_DATA_DIR / APP_BACKUP_DIR / IMAGE_TAG
+```
+
+3. 构建并启动（四件套为 D11 交付，容器健康检查 30s 一次）：
+
+```bash
+docker compose --env-file docker/.env.local up -d
+```
+
+4. 浏览器访问 `http://127.0.0.1:<APP_PORT>/`（默认 `8771`）。
+
+容器内账本固定写 `/data/ledger.db`、行情缓存固定写 `/data/quotes.json`，均在数据目录内，与本地 `./dev.db` 完全隔离；备份目录以只读方式挂进 `/backups`。
 
 ## 正式维护
 
