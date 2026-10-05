@@ -31,6 +31,22 @@ python3 server.py --db ./dev.db
 
 > Running `index.html` directly by double-clicking is not recommended for daily use. That is a degraded mode: it can still read the in-package files and the browser cache, but the disk-persistent cache, the same-origin proxy for official XLS files, and the primary/backup quote feeds do not work reliably.
 
+## Screenshots
+
+Real screenshots of the tool running locally (all data shown is fictional demo data and can be cleared):
+
+**Valuation and drawdown overview (broad-market on top, dividend below; percentiles and risk premium included)**
+
+![Valuation and drawdown overview](docs/screenshots/01-valuation-overview.jpg)
+
+**Enter your capital → per-stock order quantities are generated (target amount / theoretical shares / lots / deviation)**
+
+![Capital to order quantities](docs/screenshots/02-capital-to-orders.jpg)
+
+**Order execution (phone-assisted checklist with four states until the completion gate passes)**
+
+![Order execution checklist](docs/screenshots/03-order-execution.jpg)
+
 ## The nine indices (3 broad-market + 6 dividend)
 
 - 000300 CSI 300

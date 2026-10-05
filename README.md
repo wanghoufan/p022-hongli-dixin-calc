@@ -31,6 +31,22 @@ python3 server.py --db ./dev.db
 
 > 不建议长期直接双击 `index.html`。直接 HTML 是降级模式，仍可读取包内/浏览器缓存，但无法稳定使用磁盘持久缓存、官方 XLS 同源代理和主备行情。
 
+## 界面预览
+
+以下为本地服务真实运行截图（数据均为虚构演示，可清除）：
+
+**一、指数估值与回撤（上宽基 / 下红利，含 PE/PB/股息率分位与风险溢价）**
+
+![指数估值与回撤总览](docs/screenshots/01-valuation-overview.jpg)
+
+**四、输入资金 → 自动生成每只股票下单数量（目标金额 / 理论股数 / 手数 / 偏差）**
+
+![输入资金生成下单数量](docs/screenshots/02-capital-to-orders.jpg)
+
+**六、下单执行（手机辅助 checklist，四态处理直到完成门禁通过）**
+
+![下单执行清单](docs/screenshots/03-order-execution.jpg)
+
 ## 九个指数（三宽基＋六红利）
 
 - 000300 沪深300
