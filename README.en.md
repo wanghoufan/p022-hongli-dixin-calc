@@ -2,6 +2,8 @@
 
 [简体中文](./README.md) | English
 
+![Valuation and drawdown overview (real screenshot, demo data)](docs/screenshots/01-valuation-overview.jpg)
+
 ## What this is for
 
 This closes the loop for one person, running entirely on a local machine: judge dividend-index valuations → verify constituents and weights against official sources → enter your capital → compute how much to buy of each stock, the theoretical share count, and the legally tradable share count/lot size → freeze an order plan → place orders with phone assistance → confirm each fill manually → trace real holdings and strategy cash. It manages the "base position" (底仓) you hold in the A-share market to qualify for new-share (IPO) subscriptions on the two exchanges.
@@ -13,8 +15,6 @@ The tool only plans, records, and cross-checks. It **makes no automatic decision
 Real screenshots of the tool running locally (all data shown is fictional demo data and can be cleared):
 
 **Valuation and drawdown overview (broad-market on top, dividend below; percentiles and risk premium included)**
-
-![Valuation and drawdown overview](docs/screenshots/01-valuation-overview.jpg)
 
 **Enter your capital → per-stock order quantities are generated (target amount / theoretical shares / lots / deviation)**
 
