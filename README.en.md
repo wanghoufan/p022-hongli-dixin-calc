@@ -4,6 +4,8 @@ How expensive the six dividend indices are today, how much base position to buil
 
 [简体中文](./README.md)
 
+![Dividend index valuation and base-position panel](docs/images/valuation.png)
+
 ## What it is
 
 A single-host personal dividend base-position tool. It links "read valuations → set a plan → place orders manually on the phone → return and reconcile" into one loop, but it **only plans, records, and reconciles. It never auto-trades and never decides what to buy for you.**
